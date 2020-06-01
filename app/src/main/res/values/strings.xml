@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Pokédex</string>
+    <string name="pokemon">Pokémon</string>
+    <string name="nav_drawer_open">Nav Drawer Open</string>
+    <string name="nav_drawer_close">Nav Drawer Close</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

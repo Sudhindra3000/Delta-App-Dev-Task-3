@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#638097</color>
+    <color name="colorPrimaryDark">#416480</color>
+    <color name="colorPrimaryLight">#CBD4DC</color>
+    <color name="colorAccent">#869CAE</color>
+    <color name="pokemonRed">#FF2323</color>
+</resources>
