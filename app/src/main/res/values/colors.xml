@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#638097</color>
-    <color name="colorPrimaryDark">#416480</color>
-    <color name="colorPrimaryLight">#CBD4DC</color>
-    <color name="colorAccent">#869CAE</color>
-    <color name="pokemonRed">#FF2323</color>
+    <color name="colorPrimary">#F06262</color>
+    <color name="colorPrimaryDark">#EA2727</color>
+    <color name="colorPrimaryLight">#E3BCBC</color>
+    <color name="colorAccent">#FFA5A5</color>
 </resources>
