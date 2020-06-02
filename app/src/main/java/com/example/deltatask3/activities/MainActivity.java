@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        decorView.setSystemUiVisibility(/*View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |*/ View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         setSupportActionBar(binding.toolbar);
 
         appViewModel = new ViewModelProvider(this).get(AppViewModel.class);

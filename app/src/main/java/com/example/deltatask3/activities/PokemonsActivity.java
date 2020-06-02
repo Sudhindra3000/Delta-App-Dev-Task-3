@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.transition.Explode;
 import android.util.Log;
@@ -68,9 +69,10 @@ public class PokemonsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         getWindow().setEnterTransition(new Explode());
+        getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
 
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        decorView.setSystemUiVisibility(/*View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |*/ View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         setSupportActionBar(binding.toolbarP);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
