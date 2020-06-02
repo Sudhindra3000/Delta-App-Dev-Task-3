@@ -51,6 +51,8 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
 
         getWindow().getSharedElementEnterTransition().setDuration(500);
+        getWindow().setEnterTransition(new Explode());
+        getWindow().getEnterTransition().setDuration(500);
         names = new ArrayList<>();
         urls = new ArrayList<>();
         retrofit = new Retrofit.Builder()

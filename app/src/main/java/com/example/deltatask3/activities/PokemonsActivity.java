@@ -72,7 +72,7 @@ public class PokemonsActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
 
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(/*View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |*/ View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         setSupportActionBar(binding.toolbarP);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
