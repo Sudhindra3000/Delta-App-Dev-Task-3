@@ -323,11 +323,7 @@ public class PokemonsActivity extends AppCompatActivity {
     }
 
     private void showDetails(int position, ImageView pokemonIv, TextView nameIv) {
-        Pokemon pokemon;
-        if ((searching | submit) && searchedPokemon.size() != 0)
-            pokemon = searchedPokemon.get(position);
-        else
-            pokemon = pokemons.get(position);
+        Pokemon pokemon=pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(PokemonsActivity.this, PokemonDetailsActivity.class);
             intent.putExtra("name", pokemon.getName());

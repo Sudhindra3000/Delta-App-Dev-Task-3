@@ -2,14 +2,17 @@ package com.example.deltatask3.fragments;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
-import android.graphics.Rect;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,18 +27,24 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.activities.PokemonDetailsActivity;
 import com.example.deltatask3.adapters.PokemonAdapter;
 import com.example.deltatask3.api.PokemonApi;
+import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentPokemonsBinding;
 import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.utils.SearchResult;
 import com.example.deltatask3.viewmodels.AppViewModel;
+import com.example.deltatask3.viewmodels.FavouriteViewModel;
+import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,10 +58,12 @@ public class PokemonsFragment extends Fragment {
     private FragmentPokemonsBinding binding;
     private static final String TAG = "PokemonsFragment";
     private AppViewModel appViewModel;
+    private FavouriteViewModel favouriteViewModel;
     private Retrofit retrofit;
     private PokemonApi pokemonApi;
     private ArrayList<String> names;
     private ArrayList<Pokemon> allPokemons;
+    private ArrayList<Favourite> favourites;
     private ArrayList<Pokemon> searchedPokemon;
     private PokemonAdapter pokemonAdapter;
     private LinearLayoutManager layoutManager;
@@ -77,6 +88,7 @@ public class PokemonsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         appViewModel.setCurrentTitle("Pokémon");
+        favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
 
         names = new ArrayList<>();
         retrofit = new Retrofit.Builder()
@@ -87,10 +99,23 @@ public class PokemonsFragment extends Fragment {
         pokemonApi = retrofit.create(PokemonApi.class);
 
         allPokemons = new ArrayList<>();
+        favourites = new ArrayList<>();
         searchedPokemon = new ArrayList<>();
 
         buildRecyclerView();
         getMorePokemon();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        favouriteViewModel.getAllFavourites().observe(getViewLifecycleOwner(), new Observer<List<Favourite>>() {
+            @Override
+            public void onChanged(List<Favourite> newFavourites) {
+                favourites.clear();
+                favourites.addAll(newFavourites);
+            }
+        });
     }
 
     private void buildRecyclerView() {
@@ -124,6 +149,51 @@ public class PokemonsFragment extends Fragment {
         });
         binding.allPokemonList.setLayoutManager(layoutManager);
         binding.allPokemonList.setAdapter(pokemonAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                Pokemon swipedPokemon = pokemonAdapter.getPokemonAt(viewHolder.getAdapterPosition());
+                if (pokemonIsInFavourites(swipedPokemon)) {
+                    Log.i(TAG, "true");
+                    pokemonAdapter.notifyDataSetChanged();
+                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(swipedPokemon.getName())+" is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+                } else {
+                    Log.i(TAG, "false");
+                    addToFavourites(viewHolder.getAdapterPosition(), swipedPokemon);
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addSwipeRightBackgroundColor(Color.parseColor("#EB3939"))
+                        .addSwipeRightActionIcon(R.drawable.favoutite_icon)
+                        .create()
+                        .decorate();
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        }).attachToRecyclerView(binding.allPokemonList);
+    }
+
+    private boolean pokemonIsInFavourites(Pokemon pokemon) {
+        for (Favourite favourite : favourites) {
+            if (favourite.getPokemon().getId() == pokemon.getId())
+                return true;
+        }
+        return false;
+    }
+
+    private void addToFavourites(int position, Pokemon pokemon) {
+        StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemon.getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+        favouriteViewModel.insert(new Favourite(pokemon));
+        allPokemons.remove(position);
+        pokemonAdapter.notifyItemRemoved(position);
     }
 
     private void paginate() {
@@ -197,11 +267,7 @@ public class PokemonsFragment extends Fragment {
     }
 
     private void showDetails(int position, ImageView pokemonIv, TextView nameIv) {
-        Pokemon pokemon;
-        if ((searching | submit) && searchedPokemon.size() != 0)
-            pokemon = searchedPokemon.get(position);
-        else
-            pokemon = allPokemons.get(position);
+        Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
             intent.putExtra("name", pokemon.getName());
@@ -222,6 +288,11 @@ public class PokemonsFragment extends Fragment {
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair);
             startActivity(intent, options.toBundle());
         }
+    }
+
+
+    private String firstLetterToUppercase(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
     @Override
@@ -266,6 +337,6 @@ public class PokemonsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        binding=null;
+        binding = null;
     }
 }

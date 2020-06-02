@@ -48,12 +48,12 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.google.android.material:material:1.1.0'
 
-    // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-
     //Retrofit with Gson Converter
-    implementation 'com.squareup.retrofit2:retrofit:2.8.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.8.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    // Gson
+    implementation 'com.google.code.gson:gson:2.8.6'
 
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
@@ -68,4 +68,10 @@ dependencies {
     // Room
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    // RecyclerViewSwipeDecorator
+    implementation 'it.xabaras.android:recyclerview-swipedecorator:1.2.2'
+
+    // StyleableToast
+    implementation 'com.muddzdev:styleabletoast:2.2.3'
 }

@@ -17,4 +17,11 @@
         <!-- Customize color of navigation drawer icon and back arrow -->
         <item name="colorControlNormal">@android:color/white</item>
     </style>
+
+    <style name="ToastTheme">
+        <item name="stColorBackground">@color/colorPrimary</item>
+        <item name="stTextColor">@android:color/white</item>
+        <item name="stFont">@font/secular_one</item>
+        <item name="stRadius">10dp</item>
+    </style>
 </resources>

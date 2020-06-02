@@ -49,7 +49,7 @@ public class ItemLocationAdapter extends RecyclerView.Adapter<ItemLocationAdapte
             String urlSprite = itemLocation.getSprite().getDefault_sprite();
             if (urlSprite != null && !urlSprite.isEmpty())
                 Picasso.get().load(urlSprite).placeholder(R.drawable.placeholder_image).into(holder.binding.ivPokemon);
-        }else
+        } else
             holder.binding.ivPokemon.setVisibility(View.INVISIBLE);
         holder.binding.tvId.setText(String.valueOf(itemLocation.getId()));
         holder.binding.tvName.setText(firstLetterToUppercase(itemLocation.getName()));
@@ -60,7 +60,11 @@ public class ItemLocationAdapter extends RecyclerView.Adapter<ItemLocationAdapte
         return itemLocations.size();
     }
 
-    private String firstLetterToUppercase(String string){
-        return string.substring(0,1).toUpperCase()+string.substring(1);
+    private String firstLetterToUppercase(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
+    public ItemLocation getItemLocationAt(int pos) {
+        return itemLocations.get(pos);
     }
 }
