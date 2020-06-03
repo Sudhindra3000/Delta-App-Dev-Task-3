@@ -40,6 +40,12 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
         public FavouriteViewHolder(@NonNull FavouriteRowBinding favouriteRowBinding, FavouriteListener listener) {
             super(favouriteRowBinding.getRoot());
             binding = favouriteRowBinding;
+            binding.favRow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClicked(getAdapterPosition());
+                }
+            });
         }
     }
 

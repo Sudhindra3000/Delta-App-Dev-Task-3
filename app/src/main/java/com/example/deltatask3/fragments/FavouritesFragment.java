@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -65,8 +68,11 @@ public class FavouritesFragment extends Fragment {
             public void onChanged(List<Favourite> favourites) {
                 if (favourites.isEmpty()) {
                     binding.tvFDescription.setVisibility(View.VISIBLE);
-                }
+                    setHasOptionsMenu(false);
+                }else
+                    setHasOptionsMenu(true);
                 adapter.setFavourites(favourites);
+                adapter.notifyDataSetChanged();
             }
         });
     }
@@ -85,5 +91,28 @@ public class FavouritesFragment extends Fragment {
 
         binding.favourites.setLayoutManager(layoutManager);
         binding.favourites.setAdapter(adapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.favourites_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.deleteAll:
+                favouriteViewModel.deleteAllFavourites();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 }

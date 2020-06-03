@@ -69,7 +69,7 @@ public class PokemonsFragment extends Fragment {
     private LinearLayoutManager layoutManager;
     private int offset = 0;
     private SearchView searchView;
-    private boolean loading = true, searching = false, submit = false;
+    private boolean loading = true, searching = false;
 
     public PokemonsFragment() {
         // Required empty public constructor
@@ -160,11 +160,9 @@ public class PokemonsFragment extends Fragment {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 Pokemon swipedPokemon = pokemonAdapter.getPokemonAt(viewHolder.getAdapterPosition());
                 if (pokemonIsInFavourites(swipedPokemon)) {
-                    Log.i(TAG, "true");
-                    pokemonAdapter.notifyDataSetChanged();
-                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(swipedPokemon.getName())+" is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+                    pokemonAdapter.notifyItemChanged(viewHolder.getAdapterPosition());
+                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(swipedPokemon.getName()) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
                 } else {
-                    Log.i(TAG, "false");
                     addToFavourites(viewHolder.getAdapterPosition(), swipedPokemon);
                 }
             }
@@ -192,7 +190,9 @@ public class PokemonsFragment extends Fragment {
     private void addToFavourites(int position, Pokemon pokemon) {
         StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemon.getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
         favouriteViewModel.insert(new Favourite(pokemon));
-        allPokemons.remove(position);
+        allPokemons.remove(pokemon);
+        if (searching)
+            searchedPokemon.remove(pokemon);
         pokemonAdapter.notifyItemRemoved(position);
     }
 
@@ -290,7 +290,6 @@ public class PokemonsFragment extends Fragment {
         }
     }
 
-
     private String firstLetterToUppercase(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
@@ -307,8 +306,7 @@ public class PokemonsFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.i(TAG, "submit");
-                searching = false;
-                submit = true;
+                searching = true;
                 if (query.length() == 0) {
                     searchedPokemon.clear();
                     pokemonAdapter.setPokemons(allPokemons);
@@ -321,7 +319,6 @@ public class PokemonsFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 searching = true;
-                submit = false;
                 if (newText.length() == 0) {
                     searchedPokemon.clear();
                     pokemonAdapter.setPokemons(allPokemons);

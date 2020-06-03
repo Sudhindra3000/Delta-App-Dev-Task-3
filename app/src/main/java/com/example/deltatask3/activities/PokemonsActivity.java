@@ -3,11 +3,15 @@ package com.example.deltatask3.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.transition.Explode;
@@ -20,18 +24,24 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.adapters.PokemonAdapter;
 import com.example.deltatask3.api.PokemonApi;
+import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.ActivityPokemonsBinding;
 import com.example.deltatask3.utils.Pokedex;
 import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.utils.Region;
 import com.example.deltatask3.utils.Type;
+import com.example.deltatask3.viewmodels.FavouriteViewModel;
+import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,13 +55,15 @@ public class PokemonsActivity extends AppCompatActivity {
     private final int REGIONS = 45, TYPES = 23;
     private int mode, offset = 0;
     private ActivityPokemonsBinding binding;
+    private FavouriteViewModel favouriteViewModel;
+    private ArrayList<Favourite> favourites;
     private Retrofit retrofit;
     private PokemonApi pokemonApi;
     private LinearLayoutManager layoutManager;
     private PokemonAdapter pokemonAdapter;
     private ArrayList<Pokemon> pokemons, searchedPokemon;
     private androidx.appcompat.widget.SearchView searchView;
-    private boolean loading = true, searching = false, submit = false, paginate = true;
+    private boolean loading = true, searching = false, paginate = true;
 
     private int regionID;
     private String regionName;
@@ -77,10 +89,19 @@ public class PokemonsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        favouriteViewModel=new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavouriteViewModel.class);
+        favouriteViewModel.getAllFavourites().observe(this, new Observer<List<Favourite>>() {
+            @Override
+            public void onChanged(List<Favourite> newFavourites) {
+                favourites.clear();
+                favourites.addAll(newFavourites);
+            }
+        });
         pokedex = new Pokedex();
         pokedexes = new ArrayList<>();
         pokemons = new ArrayList<>();
         searchedPokemon = new ArrayList<>();
+        favourites=new ArrayList<>();
         names = new ArrayList<>();
         retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
@@ -138,6 +159,51 @@ public class PokemonsActivity extends AppCompatActivity {
         });
         binding.pokemonsList.setLayoutManager(layoutManager);
         binding.pokemonsList.setAdapter(pokemonAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                Pokemon swipedPokemon = pokemonAdapter.getPokemonAt(viewHolder.getAdapterPosition());
+                if (pokemonIsInFavourites(swipedPokemon)) {
+                    pokemonAdapter.notifyItemChanged(viewHolder.getAdapterPosition());
+                    StyleableToast.makeText(getApplicationContext(), firstLetterToUppercase(swipedPokemon.getName()) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+                } else {
+                    addToFavourites(viewHolder.getAdapterPosition(), swipedPokemon);
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addSwipeRightBackgroundColor(Color.parseColor("#EB3939"))
+                        .addSwipeRightActionIcon(R.drawable.favoutite_icon)
+                        .create()
+                        .decorate();
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        }).attachToRecyclerView(binding.pokemonsList);
+    }
+
+    private boolean pokemonIsInFavourites(Pokemon pokemon){
+        for (Favourite favourite : favourites) {
+            if (favourite.getPokemon().getId() == pokemon.getId())
+                return true;
+        }
+        return false;
+    }
+
+    private void addToFavourites(int position, Pokemon pokemon) {
+        StyleableToast.makeText(this, firstLetterToUppercase(pokemon.getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+        favouriteViewModel.insert(new Favourite(pokemon));
+        pokemons.remove(pokemon);
+        if (searching)
+            searchedPokemon.remove(pokemon);
+        pokemonAdapter.notifyItemRemoved(position);
     }
 
     private void paginate() {
@@ -298,6 +364,8 @@ public class PokemonsActivity extends AppCompatActivity {
                     }
 
                     pokemons.set(names.indexOf(s), response.body());
+                    if (searching)
+                        searchPokemonByName(searchView.getQuery().toString().trim().toLowerCase());
                     pokemonAdapter.notifyDataSetChanged();
                 }
 
@@ -323,7 +391,7 @@ public class PokemonsActivity extends AppCompatActivity {
     }
 
     private void showDetails(int position, ImageView pokemonIv, TextView nameIv) {
-        Pokemon pokemon=pokemonAdapter.getPokemonAt(position);
+        Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(PokemonsActivity.this, PokemonDetailsActivity.class);
             intent.putExtra("name", pokemon.getName());
@@ -346,6 +414,10 @@ public class PokemonsActivity extends AppCompatActivity {
         }
     }
 
+    private String firstLetterToUppercase(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -359,8 +431,7 @@ public class PokemonsActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.i(TAG, "submit");
-                searching = false;
-                submit = true;
+                searching = true;
                 if (query.length() == 0) {
                     searchedPokemon.clear();
                     pokemonAdapter.setPokemons(pokemons);
@@ -373,7 +444,6 @@ public class PokemonsActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 searching = true;
-                submit = false;
                 if (newText.length() == 0) {
                     searchedPokemon.clear();
                     pokemonAdapter.setPokemons(pokemons);
