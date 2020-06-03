@@ -55,7 +55,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PokemonsFragment extends Fragment {
 
-    private final String SPEED = "speed", HP = "hp", ATTACK = "attack", DEFENSE = "defense", SP_ATTACK = "special-attack", SP_DEFENSE = "special-defense";
     private FragmentPokemonsBinding binding;
     private static final String TAG = "PokemonsFragment";
     private AppViewModel appViewModel;
@@ -270,19 +269,9 @@ public class PokemonsFragment extends Fragment {
         Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
-            intent.putExtra("name", pokemon.getName());
-            intent.putExtra("id", pokemon.getId());
-            intent.putExtra("imageURL", pokemon.getSprites().getFront_default());
-            intent.putExtra("types", pokemon.getTypes().size());
-            intent.putExtra("type1", pokemon.getTypes().get(0).getType().getName());
-            if (pokemon.getTypes().size() == 2)
-                intent.putExtra("type2", pokemon.getTypes().get(1).getType().getName());
-            intent.putExtra(SPEED, pokemon.getStats().get(0).getBase_stat());
-            intent.putExtra(SP_DEFENSE, pokemon.getStats().get(1).getBase_stat());
-            intent.putExtra(SP_ATTACK, pokemon.getStats().get(2).getBase_stat());
-            intent.putExtra(DEFENSE, pokemon.getStats().get(3).getBase_stat());
-            intent.putExtra(ATTACK, pokemon.getStats().get(4).getBase_stat());
-            intent.putExtra(HP, pokemon.getStats().get(5).getBase_stat());
+            Gson gson=new Gson();
+            String pokemonJson=gson.toJson(pokemon);
+            intent.putExtra("pokemonJson",pokemonJson);
             Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
             Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair);

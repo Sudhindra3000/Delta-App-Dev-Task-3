@@ -36,6 +36,7 @@ import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.utils.Region;
 import com.example.deltatask3.utils.Type;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
+import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
@@ -50,7 +51,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PokemonsActivity extends AppCompatActivity {
 
-    private final String SPEED = "speed", HP = "hp", ATTACK = "attack", DEFENSE = "defense", SP_ATTACK = "special-attack", SP_DEFENSE = "special-defense";
     private static final String TAG = "PokemonsActivity";
     private final int REGIONS = 45, TYPES = 23;
     private int mode, offset = 0;
@@ -394,19 +394,9 @@ public class PokemonsActivity extends AppCompatActivity {
         Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(PokemonsActivity.this, PokemonDetailsActivity.class);
-            intent.putExtra("name", pokemon.getName());
-            intent.putExtra("id", pokemon.getId());
-            intent.putExtra("imageURL", pokemon.getSprites().getFront_default());
-            intent.putExtra("types", pokemon.getTypes().size());
-            intent.putExtra("type1", pokemon.getTypes().get(0).getType().getName());
-            if (pokemon.getTypes().size() == 2)
-                intent.putExtra("type2", pokemon.getTypes().get(1).getType().getName());
-            intent.putExtra(SPEED, pokemon.getStats().get(0).getBase_stat());
-            intent.putExtra(SP_DEFENSE, pokemon.getStats().get(1).getBase_stat());
-            intent.putExtra(SP_ATTACK, pokemon.getStats().get(2).getBase_stat());
-            intent.putExtra(DEFENSE, pokemon.getStats().get(3).getBase_stat());
-            intent.putExtra(ATTACK, pokemon.getStats().get(4).getBase_stat());
-            intent.putExtra(HP, pokemon.getStats().get(5).getBase_stat());
+            Gson gson=new Gson();
+            String pokemonJson=gson.toJson(pokemon);
+            intent.putExtra("pokemonJson",pokemonJson);
             Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
             Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(PokemonsActivity.this, imagePair, namePair);

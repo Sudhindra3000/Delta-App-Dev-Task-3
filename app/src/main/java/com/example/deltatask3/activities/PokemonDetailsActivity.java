@@ -15,8 +15,10 @@ import com.example.deltatask3.R;
 import com.example.deltatask3.api.PokemonApi;
 import com.example.deltatask3.databinding.ActivityPokemonDetailsBinding;
 import com.example.deltatask3.utils.EvolutionChain;
+import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.utils.PokemonID;
 import com.example.deltatask3.utils.PokemonSpecies;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class PokemonDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "PokemonDetailsActivity";
-    private final String SPEED = "speed", HP = "hp", ATTACK = "attack", DEFENSE = "defense", SP_ATTACK = "special-attack", SP_DEFENSE = "special-defense";
     private ActivityPokemonDetailsBinding binding;
     private Intent intent;
     private int id;
@@ -38,6 +39,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
     private PokemonApi pokemonApi;
     private String evolutionChainURL;
     private String name, url;
+    private Pokemon pokemon;
     private ArrayList<String> names;
     private ArrayList<String> urls;
 
@@ -63,13 +65,14 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         pokemonApi = retrofit.create(PokemonApi.class);
 
         intent = getIntent();
-        id = intent.getIntExtra("id", 0);
-        name = intent.getStringExtra("name");
-        url = intent.getStringExtra("imageURL");
+        String pokemonJson = intent.getStringExtra("pokemonJson");
+        pokemon = new Gson().fromJson(pokemonJson, Pokemon.class);
+        id = pokemon.getId();
+        name = pokemon.getName();
+        url = pokemon.getSprites().getFront_default();
         getTypes();
         getStats();
         getSpecies();
-
 
         binding.tvDetailsId.setText("ID:" + id);
         binding.tvDetailsName.setText(firstLetterToUppercase(name));
@@ -79,22 +82,21 @@ public class PokemonDetailsActivity extends AppCompatActivity {
     }
 
     private void getTypes() {
-        int types = intent.getIntExtra("types", 1);
-        binding.tvType1.setText(firstLetterToUppercase(intent.getStringExtra("type1")));
-        if (types == 1) {
+        binding.tvType1.setText(firstLetterToUppercase(pokemon.getTypes().get(0).getType().getName()));
+        if (pokemon.getTypes().size() == 1) {
             binding.tvTypes.setText("Type");
             binding.tvType2.setVisibility(View.GONE);
         } else
-            binding.tvType2.setText(firstLetterToUppercase(intent.getStringExtra("type2")));
+            binding.tvType2.setText(firstLetterToUppercase(pokemon.getTypes().get(1).getType().getName()));
     }
 
     private void getStats() {
-        binding.tvSpeed.setText("Speed : " + intent.getIntExtra(SPEED, 0));
-        binding.tvHp.setText("Hp : " + intent.getIntExtra(HP, 0));
-        binding.tvAttack.setText("Attack : " + intent.getIntExtra(ATTACK, 0));
-        binding.tvDefense.setText("Defense : " + intent.getIntExtra(DEFENSE, 0));
-        binding.tvSpAttack.setText("Sp. Attack : " + intent.getIntExtra(SP_ATTACK, 0));
-        binding.tvSpDefense.setText("Sp. Defense : " + intent.getIntExtra(SP_DEFENSE, 0));
+        binding.tvSpeed.setText("Speed : " + pokemon.getStats().get(0).getBase_stat());
+        binding.tvHp.setText("Hp : " + pokemon.getStats().get(5).getBase_stat());
+        binding.tvAttack.setText("Attack : " + pokemon.getStats().get(4).getBase_stat());
+        binding.tvDefense.setText("Defense : " + pokemon.getStats().get(3).getBase_stat());
+        binding.tvSpAttack.setText("Sp. Attack : " + pokemon.getStats().get(2).getBase_stat());
+        binding.tvSpDefense.setText("Sp. Defense : " + pokemon.getStats().get(1).getBase_stat());
     }
 
     private void getSpecies() {
@@ -145,7 +147,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
                     }
                 }
 
-                switch (names.size()){
+                switch (names.size()) {
                     case 3:
                         binding.evolutionCard3.setVisibility(View.VISIBLE);
                         break;
@@ -208,7 +210,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
                 }
                 break;
             case 2:
-                switch (index){
+                switch (index) {
                     case 0:
                         Picasso.get().load(urls.get(0)).placeholder(R.drawable.placeholder_image).into(binding.iv21);
                         binding.tv21.setText(firstLetterToUppercase(names.get(0)));

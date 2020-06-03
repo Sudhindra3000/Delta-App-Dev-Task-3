@@ -3,6 +3,8 @@ package com.example.deltatask3.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +32,7 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
     }
 
     public interface FavouriteListener {
-        void onItemClicked(int pos );
+        void onItemClicked(int pos, ImageView pokemon, TextView name);
     }
 
     public static class FavouriteViewHolder extends RecyclerView.ViewHolder {
@@ -43,7 +45,7 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
             binding.favRow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.onItemClicked(getAdapterPosition());
+                    listener.onItemClicked(getAdapterPosition(),binding.ivF,binding.tvFName);
                 }
             });
         }
@@ -72,7 +74,7 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
 
     @Override
     public int getItemCount() {
-        if (favourites==null) return 0;
+        if (favourites == null) return 0;
         return favourites.size();
     }
 

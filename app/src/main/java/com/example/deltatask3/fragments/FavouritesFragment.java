@@ -1,5 +1,7 @@
 package com.example.deltatask3.fragments;
 
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,7 +21,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.example.deltatask3.activities.PokemonDetailsActivity;
 import com.example.deltatask3.adapters.FavouriteAdapter;
 import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentFavouritesBinding;
@@ -91,8 +97,8 @@ public class FavouritesFragment extends Fragment {
         adapter = new FavouriteAdapter();
         adapter.setListener(new FavouriteAdapter.FavouriteListener() {
             @Override
-            public void onItemClicked(int pos) {
-                showDetails(adapter.getFavouriteAt(pos).getPokemon());
+            public void onItemClicked(int pos, ImageView pokemon, TextView name) {
+                showDetails(adapter.getFavouriteAt(pos).getPokemon(),pokemon,name);
             }
         });
 
@@ -100,15 +106,23 @@ public class FavouritesFragment extends Fragment {
         binding.favourites.setAdapter(adapter);
     }
 
-    private void showDetails(Pokemon pokemon){
-        Gson gson=new Gson();
-        String pokemonJson=gson.toJson(pokemon);
+    private void showDetails(Pokemon pokemon, ImageView pokemonIv, TextView nameIv) {
+        if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
+            Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
+            Gson gson = new Gson();
+            String pokemonJson = gson.toJson(pokemon);
+            intent.putExtra("pokemonJson", pokemonJson);
+            Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
+            Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair);
+            startActivity(intent, options.toBundle());
+        }
     }
 
     private void searchFavouritesByName(String name) {
         searchedFavourites.clear();
 
-        for (Favourite favourite :favouriteViewModel.getAllFavourites().getValue()) {
+        for (Favourite favourite : favouriteViewModel.getAllFavourites().getValue()) {
             if (favourite.getPokemon().getName().trim().contains(name))
                 searchedFavourites.add(new Favourite(favourite.getPokemon()));
         }
