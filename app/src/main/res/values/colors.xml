@@ -6,4 +6,5 @@
     <color name="colorAccent">#FF9292</color>
     <color name="colorText">#EB3939</color>
     <color name="hintTextColor">#EEEEEE</color>
+    <color name="scrollBarThumbColor">#FF4949</color>
 </resources>

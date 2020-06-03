@@ -39,6 +39,7 @@ import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.utils.SearchResult;
 import com.example.deltatask3.viewmodels.AppViewModel;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
+import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
@@ -254,7 +255,6 @@ public class PokemonsFragment extends Fragment {
     }
 
     private void searchPokemonByName(String name) {
-        name = name.trim().toLowerCase();
         searchedPokemon.clear();
 
         for (Pokemon pokemon : allPokemons) {

@@ -83,5 +83,4 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
     public Favourite getFavouriteAt(int pos) {
         return favourites.get(pos);
     }
-
 }

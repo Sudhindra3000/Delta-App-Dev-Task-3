@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadeScrollbars="true"
+    android:scrollbarThumbVertical="@color/scrollBarThumbColor"
+    android:scrollbars="vertical"
+    android:verticalScrollbarPosition="right"
     tools:context=".fragments.TypesFragment">
 
     <LinearLayout

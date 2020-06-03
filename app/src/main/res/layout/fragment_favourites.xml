@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadeScrollbars="true"
+    android:scrollbarThumbVertical="@color/scrollBarThumbColor"
+    android:scrollbars="vertical"
+    android:verticalScrollbarPosition="right"
     tools:context=".fragments.FavouritesFragment">
 
     <TextView
@@ -27,6 +31,9 @@
         android:id="@+id/favourites"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbarSize="4dp"
+        android:scrollbars="vertical"
+        android:verticalScrollbarPosition="right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
