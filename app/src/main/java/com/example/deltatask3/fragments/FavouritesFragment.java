@@ -143,9 +143,19 @@ public class FavouritesFragment extends Fragment {
     }
 
     private String getPokemonDetailsAsString(Pokemon pokemon) {
-        String result = "ID : " + pokemon.getId() + "\n" +
-                "Pokémon : " + firstLetterToUppercase(pokemon.getName());
-        return result;
+        String details = "ID : " + pokemon.getId() + "\n" +
+                "Pokémon : " + firstLetterToUppercase(pokemon.getName()) + "\n";
+        if (pokemon.getTypes().size() == 1)
+            details = details + "Type : " + firstLetterToUppercase(pokemon.getTypes().get(0).getType().getName()) + "\n";
+        else
+            details = details + "Types : " + firstLetterToUppercase(pokemon.getTypes().get(0).getType().getName()) + ", " + firstLetterToUppercase(pokemon.getTypes().get(1).getType().getName()) + "\n";
+        details = details + "Speed : " + pokemon.getStats().get(0).getBase_stat() + "\n"
+                + "Hp : " + pokemon.getStats().get(5).getBase_stat() + "\n"
+                + "Attack : " + pokemon.getStats().get(4).getBase_stat() + "\n"
+                + "Defense : " + pokemon.getStats().get(3).getBase_stat() + "\n"
+                + "Sp. Attack : " + pokemon.getStats().get(2).getBase_stat() + "\n"
+                + "Sp. Defense : " + pokemon.getStats().get(1).getBase_stat();
+        return details;
     }
 
     private Bitmap getBitmapFromView(View view) {
