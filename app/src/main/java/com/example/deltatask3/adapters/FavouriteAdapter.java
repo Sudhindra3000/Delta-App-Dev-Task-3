@@ -33,6 +33,8 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
 
     public interface FavouriteListener {
         void onItemClicked(int pos, ImageView pokemon, TextView name);
+
+        void onShareClicked(int pos, ImageView imageView);
     }
 
     public static class FavouriteViewHolder extends RecyclerView.ViewHolder {
@@ -45,7 +47,13 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
             binding.favRow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.onItemClicked(getAdapterPosition(),binding.ivF,binding.tvFName);
+                    listener.onItemClicked(getAdapterPosition(), binding.ivF, binding.tvFName);
+                }
+            });
+            binding.shareButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onShareClicked(getAdapterPosition(), binding.ivF);
                 }
             });
         }

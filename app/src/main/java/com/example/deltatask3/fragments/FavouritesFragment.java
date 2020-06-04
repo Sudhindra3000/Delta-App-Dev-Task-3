@@ -2,11 +2,17 @@ package com.example.deltatask3.fragments;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,6 +40,8 @@ import com.example.deltatask3.R;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,10 +112,55 @@ public class FavouritesFragment extends Fragment {
             public void onItemClicked(int pos, ImageView pokemon, TextView name) {
                 showDetails(adapter.getFavouriteAt(pos).getPokemon(), pokemon, name);
             }
+
+            @Override
+            public void onShareClicked(int pos, ImageView imageView) {
+                sharePokemon(pos, imageView);
+            }
         });
 
         binding.favourites.setLayoutManager(layoutManager);
         binding.favourites.setAdapter(adapter);
+    }
+
+    private void sharePokemon(int pos, ImageView imageView) {
+        Pokemon pokemon = adapter.getFavouriteAt(pos).getPokemon();
+        Bitmap bitmap = getBitmapFromView(imageView);
+        try {
+            File file = new File(requireActivity().getExternalCacheDir(), firstLetterToUppercase(pokemon.getName()) + ".png");
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            file.setReadable(true, false);
+            Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.putExtra(Intent.EXTRA_TEXT, getPokemonDetailsAsString(pokemon));
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(requireContext(), requireContext().getApplicationContext().getPackageName() + ".provider", file));
+            intent.setType("image/png");
+            startActivity(Intent.createChooser(intent, "Share Pokémon via"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getPokemonDetailsAsString(Pokemon pokemon) {
+        String result = "ID : " + pokemon.getId() + "\n" +
+                "Pokémon : " + firstLetterToUppercase(pokemon.getName());
+        return result;
+    }
+
+    private Bitmap getBitmapFromView(View view) {
+        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable != null) {
+            bgDrawable.draw(canvas);
+        } else {
+            canvas.drawColor(Color.WHITE);
+        }
+        view.draw(canvas);
+        return returnedBitmap;
     }
 
     private void showDetails(Pokemon pokemon, ImageView pokemonIv, TextView nameIv) {
@@ -185,5 +238,9 @@ public class FavouritesFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+
+    private String firstLetterToUppercase(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 }
