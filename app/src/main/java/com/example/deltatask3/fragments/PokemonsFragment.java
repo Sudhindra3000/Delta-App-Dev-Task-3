@@ -190,6 +190,7 @@ public class PokemonsFragment extends Fragment {
     private void addToFavourites(int position, Pokemon pokemon) {
         StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemon.getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
         favouriteViewModel.insert(new Favourite(pokemon));
+        names.remove(pokemon.getName());
         allPokemons.remove(pokemon);
         if (searching)
             searchedPokemon.remove(pokemon);

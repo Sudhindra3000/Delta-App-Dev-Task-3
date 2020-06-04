@@ -200,6 +200,8 @@ public class PokemonsActivity extends AppCompatActivity {
     private void addToFavourites(int position, Pokemon pokemon) {
         StyleableToast.makeText(this, firstLetterToUppercase(pokemon.getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
         favouriteViewModel.insert(new Favourite(pokemon));
+        offset--;
+        names.remove(pokemon.getName());
         pokemons.remove(pokemon);
         if (searching)
             searchedPokemon.remove(pokemon);
