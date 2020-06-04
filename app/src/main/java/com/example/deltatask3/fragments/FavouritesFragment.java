@@ -82,9 +82,13 @@ public class FavouritesFragment extends Fragment {
             public void onChanged(List<Favourite> favourites) {
                 if (favourites.isEmpty()) {
                     binding.tvFDescription.setVisibility(View.VISIBLE);
+                    binding.favourites.setVisibility(View.INVISIBLE);
                     setHasOptionsMenu(false);
-                } else
+                } else {
+                    binding.tvFDescription.setVisibility(View.INVISIBLE);
+                    binding.favourites.setVisibility(View.VISIBLE);
                     setHasOptionsMenu(true);
+                }
                 adapter.setFavourites(favourites);
                 adapter.notifyDataSetChanged();
             }
@@ -98,7 +102,7 @@ public class FavouritesFragment extends Fragment {
         adapter.setListener(new FavouriteAdapter.FavouriteListener() {
             @Override
             public void onItemClicked(int pos, ImageView pokemon, TextView name) {
-                showDetails(adapter.getFavouriteAt(pos).getPokemon(),pokemon,name);
+                showDetails(adapter.getFavouriteAt(pos).getPokemon(), pokemon, name);
             }
         });
 
