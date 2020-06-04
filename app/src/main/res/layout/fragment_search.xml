@@ -32,207 +32,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.cardview.widget.CardView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/pokemonCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="20dp"
-            android:foreground="?attr/selectableItemBackground"
-            android:visibility="invisible"
-            app:cardBackgroundColor="@color/colorPrimaryLight"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp">
+            tools:itemCount="1"
+            tools:listitem="@layout/pokemon_row" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/tvSPName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:fontFamily="@font/secular_one"
-                    android:gravity="left|center_vertical"
-                    android:text="Name"
-                    android:textColor="@color/colorText"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:transitionName="pokemonName"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ivSPImg"
-                    app:layout_constraintHorizontal_bias="0.063"
-                    app:layout_constraintStart_toEndOf="@+id/tvSPId"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvSPId"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/secular_one"
-                    android:gravity="left|center_vertical"
-                    android:text="000"
-                    android:textColor="@color/colorText"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.09"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/ivSPImg"
-                    android:layout_width="78dp"
-                    android:layout_height="78dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:src="@drawable/placeholder_image"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.95"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/itemCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="20dp"
-            android:visibility="invisible"
-            app:cardBackgroundColor="@color/colorPrimaryLight"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp">
+            tools:itemCount="1"
+            tools:listitem="@layout/pokemon_row" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/tvSIName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:fontFamily="@font/secular_one"
-                    android:gravity="left|center_vertical"
-                    android:text="Name"
-                    android:textColor="@color/colorText"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:transitionName="pokemonName"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ivSIImg"
-                    app:layout_constraintHorizontal_bias="0.063"
-                    app:layout_constraintStart_toEndOf="@+id/tvSIId"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvSIId"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/secular_one"
-                    android:gravity="left|center_vertical"
-                    android:text="000"
-                    android:textColor="@color/colorText"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.09"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/ivSIImg"
-                    android:layout_width="78dp"
-                    android:layout_height="78dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:src="@drawable/placeholder_image"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.95"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/locationCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="20dp"
-            android:visibility="invisible"
-            app:cardBackgroundColor="@color/colorPrimaryLight"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/tvSLName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:fontFamily="@font/secular_one"
-                    android:gravity="left|center_vertical"
-                    android:text="Name"
-                    android:textColor="@color/colorText"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:transitionName="pokemonName"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/imageView4"
-                    app:layout_constraintHorizontal_bias="0.063"
-                    app:layout_constraintStart_toEndOf="@+id/tvSLId"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/imageView4"
-                    android:layout_width="78dp"
-                    android:layout_height="78dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:src="@drawable/placeholder_image"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.95"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvSLId"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:fontFamily="@font/secular_one"
-                    android:gravity="left|center_vertical"
-                    android:text="000"
-                    android:textColor="@color/colorText"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.09"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+            tools:itemCount="1"
+            tools:listitem="@layout/pokemon_row" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

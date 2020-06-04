@@ -2,6 +2,8 @@ package com.example.deltatask3.fragments;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,6 +11,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.InputType;
 import android.util.Log;
@@ -22,17 +27,25 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.activities.PokemonDetailsActivity;
+import com.example.deltatask3.adapters.ItemLocationAdapter;
+import com.example.deltatask3.adapters.PokemonAdapter;
 import com.example.deltatask3.api.PokemonApi;
+import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentSearchBinding;
 import com.example.deltatask3.utils.ItemLocation;
 import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.viewmodels.AppViewModel;
+import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
-import com.squareup.picasso.Picasso;
+import com.muddzdev.styleabletoast.StyleableToast;
 
+import java.util.ArrayList;
+
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,11 +57,15 @@ public class SearchFragment extends Fragment {
 
     private static final String TAG = "SearchFragment";
     private AppViewModel appViewModel;
+    private FavouriteViewModel favouriteViewModel;
     private FragmentSearchBinding binding;
     private Retrofit retrofit;
     private PokemonApi pokemonApi;
-    private Pokemon pokemon;
-    private ItemLocation item, location;
+    private ArrayList<Pokemon> pokemons;
+    private ArrayList<ItemLocation> locations,items;
+    private PokemonAdapter pokemonAdapter;
+    private ItemLocationAdapter locationAdapter,itemAdapter;
+    private LinearLayoutManager pokemonLayoutManager,locationLayoutManager,itemLayoutManager;
     private SearchView searchView;
 
     @Override
@@ -64,26 +81,92 @@ public class SearchFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         appViewModel.setCurrentTitle("Search");
+        favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
 
+        pokemons=new ArrayList<>();
+        items=new ArrayList<>();
+        locations=new ArrayList<>();
         retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl("https://pokeapi.co/api/v2/")
                 .build();
         pokemonApi = retrofit.create(PokemonApi.class);
 
-        binding.pokemonCard.setOnClickListener(new View.OnClickListener() {
+        buildRecyclerView();
+    }
+
+    private void buildRecyclerView(){
+        binding.pokemonCard.setHasFixedSize(true);
+        pokemonLayoutManager=new LinearLayoutManager(requireContext());
+        pokemonAdapter=new PokemonAdapter();
+        pokemonAdapter.setPokemons(pokemons);
+        pokemonAdapter.setListener(new PokemonAdapter.PokemonAdapterListener() {
             @Override
-            public void onClick(View v) {
-                showDetails(binding.ivSPImg, binding.tvSPName);
+            public void onItemClicked(int position, ImageView pokemon, TextView name) {
+                showDetails(pokemon,name);
             }
         });
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                if (pokemonIsInFavourites(pokemons.get(0))){
+                    pokemonAdapter.notifyItemChanged(0);
+                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons.get(0).getName()) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+                }else {
+                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons.get(0).getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+                    favouriteViewModel.insert(new Favourite(pokemons.get(0)));
+                    pokemons.clear();
+                    binding.pokemonCard.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addSwipeRightBackgroundColor(Color.parseColor("#EB3939"))
+                        .addSwipeRightActionIcon(R.drawable.favoutite_icon)
+                        .create()
+                        .decorate();
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        }).attachToRecyclerView(binding.pokemonCard);
+        binding.pokemonCard.setLayoutManager(pokemonLayoutManager);
+        binding.pokemonCard.setAdapter(pokemonAdapter);
+
+
+        binding.itemCard.setHasFixedSize(true);
+        itemLayoutManager=new LinearLayoutManager(requireContext());
+        itemAdapter=new ItemLocationAdapter();
+        itemAdapter.setItemLocations(items);
+        binding.itemCard.setLayoutManager(itemLayoutManager);
+        binding.itemCard.setAdapter(itemAdapter);
+
+        binding.locationCard.setHasFixedSize(true);
+        locationLayoutManager=new LinearLayoutManager(requireContext());
+        locationAdapter=new ItemLocationAdapter();
+        locationAdapter.setItemLocations(locations);
+        binding.locationCard.setLayoutManager(locationLayoutManager);
+        binding.locationCard.setAdapter(locationAdapter);
+    }
+
+    private boolean pokemonIsInFavourites(Pokemon pokemon) {
+        for (Favourite favourite : favouriteViewModel.getAllFavourites().getValue()) {
+            if (favourite.getPokemon().getId() == pokemon.getId())
+                return true;
+        }
+        return false;
     }
 
     private void showDetails(ImageView pokemonIv, TextView nameIv) {
-        if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
+        if (pokemons.get(0).getId() != 0 && pokemons.get(0).getSprites() != null) {
             Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
             Gson gson=new Gson();
-            String pokemonJson=gson.toJson(pokemon);
+            String pokemonJson=gson.toJson(pokemons.get(0));
             intent.putExtra("pokemonJson",pokemonJson);
             Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
             Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
@@ -106,10 +189,9 @@ public class SearchFragment extends Fragment {
                 }
 
                 binding.pokemonCard.setVisibility(View.VISIBLE);
-                pokemon = response.body();
-                binding.tvSPId.setText(String.valueOf(pokemon.getId()));
-                binding.tvSPName.setText(firstLetterToUppercase(pokemon.getName()));
-                Picasso.get().load(pokemon.getSprites().getFront_default()).placeholder(R.drawable.placeholder_image).into(binding.ivSPImg);
+                pokemons.clear();
+                pokemons.add(response.body());
+                pokemonAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -128,10 +210,9 @@ public class SearchFragment extends Fragment {
                 }
 
                 binding.itemCard.setVisibility(View.VISIBLE);
-                item = response.body();
-                binding.tvSIId.setText(String.valueOf(item.getId()));
-                binding.tvSIName.setText(firstLetterToUppercase(item.getName()));
-                Picasso.get().load(item.getSprite().getDefault_sprite()).placeholder(R.drawable.placeholder_image).into(binding.ivSIImg);
+                items.clear();
+                items.add(response.body());
+                itemAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -150,9 +231,9 @@ public class SearchFragment extends Fragment {
                 }
 
                 binding.locationCard.setVisibility(View.VISIBLE);
-                location = response.body();
-                binding.tvSLId.setText(String.valueOf(location.getId()));
-                binding.tvSLName.setText(firstLetterToUppercase(location.getName()));
+                locations.clear();
+                locations.add(response.body());
+                locationAdapter.notifyDataSetChanged();
             }
 
             @Override
