@@ -61,7 +61,7 @@ public class LocationsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding=FragmentLocationsBinding.inflate(inflater,container,false);
+        binding = FragmentLocationsBinding.inflate(inflater, container, false);
         setHasOptionsMenu(true);
         return binding.getRoot();
     }
@@ -69,12 +69,12 @@ public class LocationsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel=new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+        appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         appViewModel.setCurrentTitle("Locations");
 
-        names=new ArrayList<>();
-        locations=new ArrayList<>();
-        searchedLocations=new ArrayList<>();
+        names = new ArrayList<>();
+        locations = new ArrayList<>();
+        searchedLocations = new ArrayList<>();
         retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl("https://pokeapi.co/api/v2/")
@@ -112,13 +112,13 @@ public class LocationsFragment extends Fragment {
         binding.allLocations.setAdapter(adapter);
     }
 
-    private void paginate(){
-        offset+=20;
+    private void paginate() {
+        offset += 20;
         getLocations();
     }
 
-    private void getLocations(){
-        Call<SearchResult> call=pokemonApi.getLocationsWithOffsetAndLimit(offset,20);
+    private void getLocations() {
+        Call<SearchResult> call = pokemonApi.getLocationsWithOffsetAndLimit(offset, 20);
         call.enqueue(new Callback<SearchResult>() {
             @Override
             public void onResponse(Call<SearchResult> call, Response<SearchResult> response) {
@@ -132,7 +132,7 @@ public class LocationsFragment extends Fragment {
                     locations.add(new ItemLocation(result.getName()));
                 }
 
-                loading=true;
+                loading = true;
                 loadLocations(names);
             }
 
@@ -143,9 +143,9 @@ public class LocationsFragment extends Fragment {
         });
     }
 
-    private void loadLocations(ArrayList<String> names){
-        for (String s :names) {
-            Call<ItemLocation> call=pokemonApi.getLocationFromName(s);
+    private void loadLocations(ArrayList<String> names) {
+        for (String s : names) {
+            Call<ItemLocation> call = pokemonApi.getLocationFromName(s);
             call.enqueue(new Callback<ItemLocation>() {
                 @Override
                 public void onResponse(Call<ItemLocation> call, Response<ItemLocation> response) {
@@ -154,7 +154,8 @@ public class LocationsFragment extends Fragment {
                         return;
                     }
 
-                    locations.set(names.indexOf(s),response.body());
+                    if (names.indexOf(s) >= 0)
+                        locations.set(names.indexOf(s), response.body());
 
                     adapter.notifyDataSetChanged();
                 }
@@ -167,7 +168,7 @@ public class LocationsFragment extends Fragment {
         }
     }
 
-    private void searchLocationsByName(String name){
+    private void searchLocationsByName(String name) {
         name = name.trim().toLowerCase();
         searchedLocations.clear();
 
@@ -213,6 +214,6 @@ public class LocationsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        binding=null;
+        binding = null;
     }
 }

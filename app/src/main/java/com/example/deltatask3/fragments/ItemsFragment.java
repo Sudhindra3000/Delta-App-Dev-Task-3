@@ -153,7 +153,8 @@ public class ItemsFragment extends Fragment {
                         return;
                     }
 
-                    items.set(names.indexOf(s), response.body());
+                    if (names.indexOf(s) >= 0)
+                        items.set(names.indexOf(s), response.body());
 
                     adapter.notifyDataSetChanged();
                 }

@@ -240,7 +240,8 @@ public class PokemonsFragment extends Fragment {
                         return;
                     }
 
-                    allPokemons.set(names.indexOf(s), response.body());
+                    if (names.indexOf(s) >= 0)
+                        allPokemons.set(names.indexOf(s), response.body());
                     if (searching)
                         searchPokemonByName(searchView.getQuery().toString().trim().toLowerCase());
                     pokemonAdapter.notifyDataSetChanged();
@@ -270,9 +271,9 @@ public class PokemonsFragment extends Fragment {
         Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
-            Gson gson=new Gson();
-            String pokemonJson=gson.toJson(pokemon);
-            intent.putExtra("pokemonJson",pokemonJson);
+            Gson gson = new Gson();
+            String pokemonJson = gson.toJson(pokemon);
+            intent.putExtra("pokemonJson", pokemonJson);
             Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
             Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair);

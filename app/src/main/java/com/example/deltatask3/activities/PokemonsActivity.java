@@ -89,7 +89,7 @@ public class PokemonsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        favouriteViewModel=new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavouriteViewModel.class);
+        favouriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavouriteViewModel.class);
         favouriteViewModel.getAllFavourites().observe(this, new Observer<List<Favourite>>() {
             @Override
             public void onChanged(List<Favourite> newFavourites) {
@@ -101,7 +101,7 @@ public class PokemonsActivity extends AppCompatActivity {
         pokedexes = new ArrayList<>();
         pokemons = new ArrayList<>();
         searchedPokemon = new ArrayList<>();
-        favourites=new ArrayList<>();
+        favourites = new ArrayList<>();
         names = new ArrayList<>();
         retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
@@ -160,7 +160,7 @@ public class PokemonsActivity extends AppCompatActivity {
         binding.pokemonsList.setLayoutManager(layoutManager);
         binding.pokemonsList.setAdapter(pokemonAdapter);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -189,7 +189,7 @@ public class PokemonsActivity extends AppCompatActivity {
         }).attachToRecyclerView(binding.pokemonsList);
     }
 
-    private boolean pokemonIsInFavourites(Pokemon pokemon){
+    private boolean pokemonIsInFavourites(Pokemon pokemon) {
         for (Favourite favourite : favourites) {
             if (favourite.getPokemon().getId() == pokemon.getId())
                 return true;
@@ -365,7 +365,8 @@ public class PokemonsActivity extends AppCompatActivity {
                         return;
                     }
 
-                    pokemons.set(names.indexOf(s), response.body());
+                    if (names.indexOf(s) >= 0)
+                        pokemons.set(names.indexOf(s), response.body());
                     if (searching)
                         searchPokemonByName(searchView.getQuery().toString().trim().toLowerCase());
                     pokemonAdapter.notifyDataSetChanged();
@@ -396,9 +397,9 @@ public class PokemonsActivity extends AppCompatActivity {
         Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
         if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
             Intent intent = new Intent(PokemonsActivity.this, PokemonDetailsActivity.class);
-            Gson gson=new Gson();
-            String pokemonJson=gson.toJson(pokemon);
-            intent.putExtra("pokemonJson",pokemonJson);
+            Gson gson = new Gson();
+            String pokemonJson = gson.toJson(pokemon);
+            intent.putExtra("pokemonJson", pokemonJson);
             Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
             Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(PokemonsActivity.this, imagePair, namePair);
