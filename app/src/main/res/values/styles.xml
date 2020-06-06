@@ -11,11 +11,14 @@
         <item name="android:windowBackground">@color/colorPrimaryLight</item>
         <item name="android:editTextColor">@android:color/white</item>
         <item name="android:textColorHint">@color/hintTextColor</item>
+        <item name="fontFamily">@font/secular_one</item>
+        <item name="android:actionMenuTextColor">@color/colorPrimary</item>
     </style>
 
     <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <!-- Customize color of navigation drawer icon and back arrow -->
         <item name="colorControlNormal">@android:color/white</item>
+        <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
     <style name="ToastTheme">
