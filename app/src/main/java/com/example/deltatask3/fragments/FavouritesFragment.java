@@ -253,6 +253,13 @@ public class FavouritesFragment extends Fragment {
         searchView = (SearchView) item.getActionView();
         searchView.setQueryHint("Search Favourites");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searching=false;
+                return false;
+            }
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
