@@ -15,8 +15,11 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.deltatask3.activities.PokemonDetailsActivity;
 import com.example.deltatask3.adapters.FavouriteAdapter;
@@ -37,11 +41,14 @@ import com.example.deltatask3.viewmodels.AppViewModel;
 import com.example.deltatask3.R;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
+import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 
 public class FavouritesFragment extends Fragment {
@@ -54,7 +61,8 @@ public class FavouritesFragment extends Fragment {
     private FavouriteAdapter adapter;
     private LinearLayoutManager layoutManager;
     private SearchView searchView;
-    private boolean searching = false;
+    private int removedPos;
+    private boolean searching = false, removed = false;
 
 
     public FavouritesFragment() {
@@ -95,8 +103,14 @@ public class FavouritesFragment extends Fragment {
                     binding.favourites.setVisibility(View.VISIBLE);
                     setHasOptionsMenu(true);
                 }
-                adapter.setFavourites(favourites);
-                adapter.notifyDataSetChanged();
+                if (searching)
+                    adapter.setFavourites(searchedFavourites);
+                else
+                    adapter.setFavourites(favourites);
+                if (removed)
+                    adapter.notifyItemRemoved(removedPos);
+                else
+                    adapter.notifyDataSetChanged();
             }
         });
     }
@@ -116,9 +130,40 @@ public class FavouritesFragment extends Fragment {
                 sharePokemon(pos, imageView);
             }
         });
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
 
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                Favourite favourite = adapter.getFavouriteAt(viewHolder.getAdapterPosition());
+                removeFromFav(favourite, viewHolder.getAdapterPosition());
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addSwipeLeftBackgroundColor(Color.parseColor("#EB3939"))
+                        .addSwipeLeftActionIcon(R.drawable.delete_icon)
+                        .create()
+                        .decorate();
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        }).attachToRecyclerView(binding.favourites);
         binding.favourites.setLayoutManager(layoutManager);
         binding.favourites.setAdapter(adapter);
+    }
+
+    private void removeFromFav(Favourite favourite, int pos) {
+        Log.i(TAG, "removeFromFav: id=" + favourite.getId());
+        favouriteViewModel.delete(favourite);
+        if (searching)
+            searchedFavourites.remove(pos);
+        StyleableToast.makeText(requireContext(), firstLetterToUppercase(favourite.getPokemon().getName()) + " is removed from Favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+        removedPos = pos;
+        removed = true;
     }
 
     private void sharePokemon(int pos, ImageView imageView) {
@@ -187,9 +232,13 @@ public class FavouritesFragment extends Fragment {
     private void searchFavouritesByName(String name) {
         searchedFavourites.clear();
 
+        Favourite favouriteS;
         for (Favourite favourite : favouriteViewModel.getAllFavourites().getValue()) {
-            if (favourite.getPokemon().getName().trim().contains(name))
-                searchedFavourites.add(new Favourite(favourite.getPokemon()));
+            if (favourite.getPokemon().getName().trim().contains(name)) {
+                favouriteS = new Favourite(favourite.getPokemon());
+                favouriteS.setId(favourite.getId());
+                searchedFavourites.add(favouriteS);
+            }
         }
 
         adapter.setFavourites(searchedFavourites);
