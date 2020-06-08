@@ -111,6 +111,7 @@ public class FavouritesFragment extends Fragment {
                     adapter.notifyItemRemoved(removedPos);
                 else
                     adapter.notifyDataSetChanged();
+                removed = false;
             }
         });
     }
@@ -256,7 +257,7 @@ public class FavouritesFragment extends Fragment {
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
-                searching=false;
+                searching = false;
                 return false;
             }
         });
