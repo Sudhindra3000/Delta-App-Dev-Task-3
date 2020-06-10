@@ -7,4 +7,5 @@
     <color name="colorText">#EB3939</color>
     <color name="hintTextColor">#EEEEEE</color>
     <color name="scrollBarThumbColor">#FF4949</color>
+    <color name="uncheckedIconColor">#3C4043</color>
 </resources>

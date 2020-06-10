@@ -4,30 +4,37 @@
         <item
             android:id="@+id/po"
             android:contentDescription="Pokemon Menu"
+            android:icon="@drawable/pokeball_icon"
             android:title="Pokémon" />
         <item
             android:id="@+id/io"
             android:contentDescription="Items Menu"
+            android:icon="@drawable/items_icon"
             android:title="Items" />
         <item
             android:id="@+id/lo"
             android:contentDescription="Locations Menu"
+            android:icon="@drawable/location_icon"
             android:title="Locations" />
         <item
             android:id="@+id/to"
             android:contentDescription="Types Menu"
+            android:icon="@drawable/types_icon"
             android:title="Types" />
         <item
             android:id="@+id/ro"
             android:contentDescription="Regions Menu"
+            android:icon="@drawable/regions_icon"
             android:title="Regions" />
         <item
             android:id="@+id/so"
             android:contentDescription="Search Menu"
+            android:icon="@drawable/search_icon"
             android:title="Search" />
         <item
             android:id="@+id/fo"
             android:contentDescription="Favourites Menu"
+            android:icon="@drawable/favourite_icon"
             android:title="Favourites" />
     </group>
 </menu>

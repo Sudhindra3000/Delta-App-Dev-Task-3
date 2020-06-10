@@ -40,5 +40,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
+        app:itemIconTint="@color/drawer_color_list"
+        app:itemTextColor="@color/drawer_color_list"
         app:menu="@menu/drawer_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>
