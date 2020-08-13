@@ -16,10 +16,10 @@ A Pokédex App which displays details of Various Pokémon, Items and Locations f
 ## Screenshots
 ||||
 |:----------------------------------------:|:-----------------------------------------:|:-----------------------------------------: |
-| ![Imgur](https://i.imgur.com/rxhhk69.png) | ![Imgur](https://i.imgur.com/VmBTCUI.png) | ![Imgur](https://i.imgur.com/FBPZVT5.png) |
-| ![Imgur](https://i.imgur.com/cz80Lnc.png) | ![Imgur](https://i.imgur.com/TzAUHCT.png) | ![Imgur](https://i.imgur.com/ZkC6Ipm.png) |
-| ![Imgur](https://i.imgur.com/GeWWnpC.png) | ![Imgur](https://i.imgur.com/o2jyukU.png) | ![Imgur](https://i.imgur.com/0BRfnmN.png) |
-| ![Imgur](https://i.imgur.com/aUM7tWc.png) | ![Imgur](https://i.imgur.com/ql3g9nX.png) | ![Imgur](https://i.imgur.com/X1561EM.png) |
+| ![Imgur](https://i.imgur.com/zf3Ti35.png) | ![Imgur](https://i.imgur.com/sA8IRVD.png) | ![Imgur](https://i.imgur.com/nUo4CNE.png) |
+| ![Imgur](https://i.imgur.com/kb7w6rO.png) | ![Imgur](https://i.imgur.com/xuJl9Dr.png) | ![Imgur](https://i.imgur.com/iv7tV3Q.png) |
+| ![Imgur](https://i.imgur.com/IgGtpPy.png) | ![Imgur](https://i.imgur.com/IbNLicI.png) | ![Imgur](https://i.imgur.com/9deMUti.png) |
+| ![Imgur](https://i.imgur.com/g0r6zfZ.png) | ![Imgur](https://i.imgur.com/kZWAjHj.png) | ![Imgur](https://i.imgur.com/XqbAfNM.png) |
 
 ## Resources Used
 
