@@ -5,17 +5,6 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -28,6 +17,16 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.activities.PokemonDetailsActivity;
@@ -57,9 +56,7 @@ public class PokemonsFragment extends Fragment {
 
     private FragmentPokemonsBinding binding;
     private static final String TAG = "PokemonsFragment";
-    private AppViewModel appViewModel;
     private FavouriteViewModel favouriteViewModel;
-    private Retrofit retrofit;
     private PokemonApi pokemonApi;
     private ArrayList<String> names;
     private ArrayList<Pokemon> allPokemons;
@@ -86,12 +83,12 @@ public class PokemonsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
+        AppViewModel appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
         appViewModel.setCurrentTitle("Pokémon");
         favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
 
         names = new ArrayList<>();
-        retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl("https://pokeapi.co/api/v2/")
                 .build();
@@ -123,12 +120,7 @@ public class PokemonsFragment extends Fragment {
         layoutManager = new LinearLayoutManager(requireContext());
         pokemonAdapter = new PokemonAdapter();
         pokemonAdapter.setPokemons(allPokemons);
-        pokemonAdapter.setListener(new PokemonAdapter.PokemonAdapterListener() {
-            @Override
-            public void onItemClicked(int position, ImageView pokemonIv, TextView nameIv) {
-                showDetails(position, pokemonIv, nameIv);
-            }
-        });
+        pokemonAdapter.setListener(this::showDetails);
         binding.allPokemonList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {

@@ -1,15 +1,12 @@
 package com.example.deltatask3.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.transition.Explode;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.api.PokemonApi;
@@ -33,16 +30,12 @@ public class PokemonDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "PokemonDetailsActivity";
     private ActivityPokemonDetailsBinding binding;
-    private Intent intent;
     private int id;
-    private Retrofit retrofit;
     private PokemonApi pokemonApi;
     private String evolutionChainURL;
-    private String name, url;
     private Pokemon pokemon;
     private ArrayList<String> names;
     private ArrayList<String> urls;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +50,19 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         getWindow().getEnterTransition().setDuration(500);
         names = new ArrayList<>();
         urls = new ArrayList<>();
-        retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .baseUrl("https://pokeapi.co/api/v2/")
                 .build();
 
         pokemonApi = retrofit.create(PokemonApi.class);
 
-        intent = getIntent();
+        Intent intent = getIntent();
         String pokemonJson = intent.getStringExtra("pokemonJson");
         pokemon = new Gson().fromJson(pokemonJson, Pokemon.class);
         id = pokemon.getId();
-        name = pokemon.getName();
-        url = pokemon.getSprites().getFront_default();
+        String name = pokemon.getName();
+        String url = pokemon.getSprites().getFront_default();
         getTypes();
         getStats();
         getSpecies();

@@ -13,8 +13,6 @@ public class PokemonType {
         public String getName() {
             return name;
         }
-
-
     }
 
     public Type getType() {
