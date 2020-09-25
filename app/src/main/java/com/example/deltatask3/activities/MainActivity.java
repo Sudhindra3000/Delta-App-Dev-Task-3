@@ -1,19 +1,15 @@
 package com.example.deltatask3.activities;
 
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.os.Bundle;
-import android.transition.Explode;
-import android.view.MenuItem;
-import android.view.View;
-
-import com.example.deltatask3.fragments.SearchFragment;
-import com.example.deltatask3.viewmodels.AppViewModel;
 import com.example.deltatask3.R;
 import com.example.deltatask3.databinding.ActivityMainBinding;
 import com.example.deltatask3.fragments.FavouritesFragment;
@@ -21,9 +17,14 @@ import com.example.deltatask3.fragments.ItemsFragment;
 import com.example.deltatask3.fragments.LocationsFragment;
 import com.example.deltatask3.fragments.PokemonsFragment;
 import com.example.deltatask3.fragments.RegionsFragment;
+import com.example.deltatask3.fragments.SearchFragment;
 import com.example.deltatask3.fragments.TypesFragment;
+import com.example.deltatask3.viewmodels.AppViewModel;
 import com.google.android.material.navigation.NavigationView;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ActivityMainBinding binding;

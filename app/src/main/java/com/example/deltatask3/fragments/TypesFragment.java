@@ -2,27 +2,26 @@ package com.example.deltatask3.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.deltatask3.activities.PokemonsActivity;
 import com.example.deltatask3.databinding.FragmentTypesBinding;
 import com.example.deltatask3.viewmodels.AppViewModel;
-import com.example.deltatask3.R;
 
 import java.util.ArrayList;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class TypesFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "TypesFragment";
     private final int TYPES = 23;
     private AppViewModel appViewModel;
     private FragmentTypesBinding binding;
@@ -31,7 +30,6 @@ public class TypesFragment extends Fragment implements View.OnClickListener {
     public TypesFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,7 +70,7 @@ public class TypesFragment extends Fragment implements View.OnClickListener {
     }
 
     private void initTypes() {
-        types=new ArrayList<>();
+        types = new ArrayList<>();
         types.add("Normal");
         types.add("Fighting");
         types.add("Flying");
@@ -95,10 +93,10 @@ public class TypesFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        Intent intent=new Intent(getActivity(), PokemonsActivity.class);
-        intent.putExtra("mode",TYPES);
-        intent.putExtra("typeID",Integer.parseInt(v.getTag().toString()));
-        intent.putExtra("typeName",types.get(Integer.parseInt(v.getTag().toString())-1));
+        Intent intent = new Intent(getActivity(), PokemonsActivity.class);
+        intent.putExtra("mode", TYPES);
+        intent.putExtra("typeID", Integer.parseInt(v.getTag().toString()));
+        intent.putExtra("typeName", types.get(Integer.parseInt(v.getTag().toString()) - 1));
         startActivity(intent);
     }
 

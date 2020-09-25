@@ -1,14 +1,5 @@
 package com.example.deltatask3.activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -26,6 +17,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.deltatask3.R;
 import com.example.deltatask3.adapters.PokemonAdapter;
 import com.example.deltatask3.api.PokemonApi;
@@ -42,37 +42,41 @@ import com.muddzdev.styleabletoast.StyleableToast;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
+@AndroidEntryPoint
 public class PokemonsActivity extends AppCompatActivity {
 
     private static final String TAG = "PokemonsActivity";
-    private final int REGIONS = 45, TYPES = 23;
-    private int mode, offset = 0;
+    private final int REGIONS = 45;
     private ActivityPokemonsBinding binding;
+
+    private int mode, offset = 0;
+
     private FavouriteViewModel favouriteViewModel;
     private ArrayList<Favourite> favourites;
-    private Retrofit retrofit;
-    private PokemonApi pokemonApi;
+
+    @Inject
+    PokemonApi pokemonApi;
+
     private LinearLayoutManager layoutManager;
     private PokemonAdapter pokemonAdapter;
     private ArrayList<Pokemon> pokemons, searchedPokemon;
-    private androidx.appcompat.widget.SearchView searchView;
+    private SearchView searchView;
     private boolean loading = true, searching = false, paginate = true;
 
     private int regionID;
-    private String regionName;
     private Pokedex pokedex;
     private ArrayList<Pokedex> pokedexes;
     private ArrayList<String> names;
 
     private int typeID;
-    private String typeName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,24 +107,18 @@ public class PokemonsActivity extends AppCompatActivity {
         searchedPokemon = new ArrayList<>();
         favourites = new ArrayList<>();
         names = new ArrayList<>();
-        retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://pokeapi.co/api/v2/")
-                .build();
-
-        pokemonApi = retrofit.create(PokemonApi.class);
 
         mode = getIntent().getIntExtra("mode", -1);
 
         if (mode == REGIONS) {
             regionID = getIntent().getIntExtra("regionID", 0);
             regionID++;
-            regionName = getIntent().getStringExtra("regionName");
+            String regionName = getIntent().getStringExtra("regionName");
             getSupportActionBar().setTitle("Pokémon in " + regionName + " Region");
             getRegion();
         } else {
             typeID = getIntent().getIntExtra("typeID", 0);
-            typeName = getIntent().getStringExtra("typeName");
+            String typeName = getIntent().getStringExtra("typeName");
             getSupportActionBar().setTitle("Pokémon having " + typeName + " Type");
             getType();
         }

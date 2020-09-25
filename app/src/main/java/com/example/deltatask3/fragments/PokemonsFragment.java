@@ -22,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,30 +41,37 @@ import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-
+@AndroidEntryPoint
 public class PokemonsFragment extends Fragment {
 
-    private FragmentPokemonsBinding binding;
     private static final String TAG = "PokemonsFragment";
+    private FragmentPokemonsBinding binding;
+
     private FavouriteViewModel favouriteViewModel;
-    private PokemonApi pokemonApi;
+
+    @Inject
+    PokemonApi pokemonApi;
+
     private ArrayList<String> names;
     private ArrayList<Pokemon> allPokemons;
     private ArrayList<Favourite> favourites;
     private ArrayList<Pokemon> searchedPokemon;
+
     private PokemonAdapter pokemonAdapter;
     private LinearLayoutManager layoutManager;
     private int offset = 0;
+
     private SearchView searchView;
+
     private boolean loading = true, searching = false;
 
     public PokemonsFragment() {
@@ -88,12 +94,6 @@ public class PokemonsFragment extends Fragment {
         favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
 
         names = new ArrayList<>();
-        Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://pokeapi.co/api/v2/")
-                .build();
-
-        pokemonApi = retrofit.create(PokemonApi.class);
 
         allPokemons = new ArrayList<>();
         favourites = new ArrayList<>();
@@ -106,12 +106,9 @@ public class PokemonsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        favouriteViewModel.getAllFavourites().observe(getViewLifecycleOwner(), new Observer<List<Favourite>>() {
-            @Override
-            public void onChanged(List<Favourite> newFavourites) {
-                favourites.clear();
-                favourites.addAll(newFavourites);
-            }
+        favouriteViewModel.getAllFavourites().observe(getViewLifecycleOwner(), newFavourites -> {
+            favourites.clear();
+            favourites.addAll(newFavourites);
         });
     }
 

@@ -1,15 +1,6 @@
 package com.example.deltatask3.fragments;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,44 +10,54 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.deltatask3.R;
 import com.example.deltatask3.adapters.ItemLocationAdapter;
 import com.example.deltatask3.api.PokemonApi;
 import com.example.deltatask3.databinding.FragmentLocationsBinding;
 import com.example.deltatask3.utils.ItemLocation;
 import com.example.deltatask3.utils.SearchResult;
 import com.example.deltatask3.viewmodels.AppViewModel;
-import com.example.deltatask3.R;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+@AndroidEntryPoint
 public class LocationsFragment extends Fragment {
 
     private static final String TAG = "LocationsFragment";
-    private AppViewModel appViewModel;
     private FragmentLocationsBinding binding;
-    private Retrofit retrofit;
-    private PokemonApi pokemonApi;
+
+    private AppViewModel appViewModel;
+
+    @Inject
+    PokemonApi pokemonApi;
+
     private ArrayList<String> names;
     private ArrayList<ItemLocation> locations, searchedLocations;
+
     private ItemLocationAdapter adapter;
     private LinearLayoutManager layoutManager;
+
     private int offset = 0;
-    private SearchView searchView;
-    private boolean loading = true, searching = false, submit = false;
+    private boolean loading = true;
 
     public LocationsFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,11 +76,6 @@ public class LocationsFragment extends Fragment {
         names = new ArrayList<>();
         locations = new ArrayList<>();
         searchedLocations = new ArrayList<>();
-        retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://pokeapi.co/api/v2/")
-                .build();
-        pokemonApi = retrofit.create(PokemonApi.class);
 
         buildRecyclerView();
         getLocations();
@@ -186,7 +182,7 @@ public class LocationsFragment extends Fragment {
         menu.clear();
         inflater.inflate(R.menu.search_menu, menu);
         MenuItem item = menu.findItem(R.id.search);
-        searchView = (SearchView) item.getActionView();
+        SearchView searchView = (SearchView) item.getActionView();
         searchView.setQueryHint("Search Locations");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -197,8 +193,6 @@ public class LocationsFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                searching = true;
-                submit = false;
                 if (newText.length() == 0) {
                     searchedLocations.clear();
                     adapter.setItemLocations(locations);

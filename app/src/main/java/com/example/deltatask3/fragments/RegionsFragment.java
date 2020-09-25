@@ -2,15 +2,14 @@ package com.example.deltatask3.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.example.deltatask3.activities.PokemonsActivity;
 import com.example.deltatask3.databinding.FragmentRegionsBinding;
@@ -18,9 +17,12 @@ import com.example.deltatask3.viewmodels.AppViewModel;
 
 import java.util.ArrayList;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class RegionsFragment extends Fragment implements View.OnClickListener {
 
-    private final int REGIONS=45;
+    private final int REGIONS = 45;
     private FragmentRegionsBinding binding;
     private ArrayList<String> regions;
 
@@ -29,7 +31,6 @@ public class RegionsFragment extends Fragment implements View.OnClickListener {
     public RegionsFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

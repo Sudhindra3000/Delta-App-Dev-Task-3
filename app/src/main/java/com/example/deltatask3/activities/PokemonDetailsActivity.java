@@ -20,20 +20,26 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
+@AndroidEntryPoint
 public class PokemonDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "PokemonDetailsActivity";
     private ActivityPokemonDetailsBinding binding;
+
+    @Inject
+    PokemonApi pokemonApi;
+
     private int id;
-    private PokemonApi pokemonApi;
     private String evolutionChainURL;
     private Pokemon pokemon;
+
     private ArrayList<String> names;
     private ArrayList<String> urls;
 
@@ -50,12 +56,6 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         getWindow().getEnterTransition().setDuration(500);
         names = new ArrayList<>();
         urls = new ArrayList<>();
-        Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://pokeapi.co/api/v2/")
-                .build();
-
-        pokemonApi = retrofit.create(PokemonApi.class);
 
         Intent intent = getIntent();
         String pokemonJson = intent.getStringExtra("pokemonJson");

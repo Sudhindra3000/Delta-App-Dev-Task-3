@@ -7,18 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -32,13 +20,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.deltatask3.R;
 import com.example.deltatask3.activities.PokemonDetailsActivity;
 import com.example.deltatask3.adapters.FavouriteAdapter;
 import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentFavouritesBinding;
 import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.viewmodels.AppViewModel;
-import com.example.deltatask3.R;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
@@ -48,27 +47,30 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
-
+@AndroidEntryPoint
 public class FavouritesFragment extends Fragment {
 
     private static final String TAG = "FavouritesFragment";
-    private AppViewModel appViewModel;
     private FragmentFavouritesBinding binding;
+
+    private AppViewModel appViewModel;
     private FavouriteViewModel favouriteViewModel;
+
     private ArrayList<Favourite> searchedFavourites;
+
     private FavouriteAdapter adapter;
     private LinearLayoutManager layoutManager;
     private SearchView searchView;
+
     private int removedPos;
     private boolean searching = false, removed = false;
-
 
     public FavouritesFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

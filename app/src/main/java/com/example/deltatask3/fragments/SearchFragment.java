@@ -5,16 +5,6 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.InputType;
 import android.util.Log;
 import android.util.Pair;
@@ -28,6 +18,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.activities.PokemonDetailsActivity;
@@ -45,28 +44,31 @@ import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-
+@AndroidEntryPoint
 public class SearchFragment extends Fragment {
 
     private static final String TAG = "SearchFragment";
+    private FragmentSearchBinding binding;
+
     private AppViewModel appViewModel;
     private FavouriteViewModel favouriteViewModel;
-    private FragmentSearchBinding binding;
-    private Retrofit retrofit;
-    private PokemonApi pokemonApi;
+
+    @Inject
+    PokemonApi pokemonApi;
+
     private ArrayList<Pokemon> pokemons;
-    private ArrayList<ItemLocation> locations,items;
+    private ArrayList<ItemLocation> locations, items;
+
     private PokemonAdapter pokemonAdapter;
-    private ItemLocationAdapter locationAdapter,itemAdapter;
-    private LinearLayoutManager pokemonLayoutManager,locationLayoutManager,itemLayoutManager;
-    private SearchView searchView;
+    private ItemLocationAdapter locationAdapter, itemAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,30 +85,25 @@ public class SearchFragment extends Fragment {
         appViewModel.setCurrentTitle("Search");
         favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
 
-        pokemons=new ArrayList<>();
-        items=new ArrayList<>();
-        locations=new ArrayList<>();
-        retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://pokeapi.co/api/v2/")
-                .build();
-        pokemonApi = retrofit.create(PokemonApi.class);
+        pokemons = new ArrayList<>();
+        items = new ArrayList<>();
+        locations = new ArrayList<>();
 
         buildRecyclerView();
     }
 
-    private void buildRecyclerView(){
+    private void buildRecyclerView() {
         binding.pokemonCard.setHasFixedSize(true);
-        pokemonLayoutManager=new LinearLayoutManager(requireContext());
-        pokemonAdapter=new PokemonAdapter();
+        LinearLayoutManager pokemonLayoutManager = new LinearLayoutManager(requireContext());
+        pokemonAdapter = new PokemonAdapter();
         pokemonAdapter.setPokemons(pokemons);
         pokemonAdapter.setListener(new PokemonAdapter.PokemonAdapterListener() {
             @Override
             public void onItemClicked(int position, ImageView pokemon, TextView name) {
-                showDetails(pokemon,name);
+                showDetails(pokemon, name);
             }
         });
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -114,10 +111,10 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                if (pokemonIsInFavourites(pokemons.get(0))){
+                if (pokemonIsInFavourites(pokemons.get(0))) {
                     pokemonAdapter.notifyItemChanged(0);
                     StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons.get(0).getName()) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
-                }else {
+                } else {
                     StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons.get(0).getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
                     favouriteViewModel.insert(new Favourite(pokemons.get(0)));
                     pokemons.clear();
@@ -140,15 +137,15 @@ public class SearchFragment extends Fragment {
 
 
         binding.itemCard.setHasFixedSize(true);
-        itemLayoutManager=new LinearLayoutManager(requireContext());
-        itemAdapter=new ItemLocationAdapter();
+        LinearLayoutManager itemLayoutManager = new LinearLayoutManager(requireContext());
+        itemAdapter = new ItemLocationAdapter();
         itemAdapter.setItemLocations(items);
         binding.itemCard.setLayoutManager(itemLayoutManager);
         binding.itemCard.setAdapter(itemAdapter);
 
         binding.locationCard.setHasFixedSize(true);
-        locationLayoutManager=new LinearLayoutManager(requireContext());
-        locationAdapter=new ItemLocationAdapter();
+        LinearLayoutManager locationLayoutManager = new LinearLayoutManager(requireContext());
+        locationAdapter = new ItemLocationAdapter();
         locationAdapter.setItemLocations(locations);
         binding.locationCard.setLayoutManager(locationLayoutManager);
         binding.locationCard.setAdapter(locationAdapter);
@@ -165,9 +162,9 @@ public class SearchFragment extends Fragment {
     private void showDetails(ImageView pokemonIv, TextView nameIv) {
         if (pokemons.get(0).getId() != 0 && pokemons.get(0).getSprites() != null) {
             Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
-            Gson gson=new Gson();
-            String pokemonJson=gson.toJson(pokemons.get(0));
-            intent.putExtra("pokemonJson",pokemonJson);
+            Gson gson = new Gson();
+            String pokemonJson = gson.toJson(pokemons.get(0));
+            intent.putExtra("pokemonJson", pokemonJson);
             Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
             Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair);
@@ -253,7 +250,7 @@ public class SearchFragment extends Fragment {
         menu.clear();
         inflater.inflate(R.menu.search_menu, menu);
         MenuItem item = menu.findItem(R.id.search);
-        searchView = (SearchView) item.getActionView();
+        SearchView searchView = (SearchView) item.getActionView();
         searchView.setQueryHint("Enter ID");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setInputType(InputType.TYPE_CLASS_NUMBER);
