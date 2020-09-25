@@ -1,298 +1,265 @@
-package com.example.deltatask3.fragments;
+package com.example.deltatask3.fragments
 
-import android.app.ActivityOptions;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.util.Log;
-import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.deltatask3.R;
-import com.example.deltatask3.activities.PokemonDetailsActivity;
-import com.example.deltatask3.adapters.FavouriteAdapter;
-import com.example.deltatask3.database.Favourite;
-import com.example.deltatask3.databinding.FragmentFavouritesBinding;
-import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.viewmodels.FavouriteViewModel;
-import com.google.gson.Gson;
-import com.muddzdev.styleabletoast.StyleableToast;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-
-import dagger.hilt.android.AndroidEntryPoint;
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
+import android.app.ActivityOptions
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.os.Bundle
+import android.util.Log
+import android.util.Pair
+import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.deltatask3.R
+import com.example.deltatask3.activities.PokemonDetailsActivity
+import com.example.deltatask3.adapters.FavouriteAdapter
+import com.example.deltatask3.adapters.FavouriteAdapter.FavouriteListener
+import com.example.deltatask3.database.Favourite
+import com.example.deltatask3.databinding.FragmentFavouritesBinding
+import com.example.deltatask3.utils.Pokemon
+import com.example.deltatask3.viewmodels.FavouriteViewModel
+import com.google.gson.Gson
+import com.muddzdev.styleabletoast.StyleableToast
+import dagger.hilt.android.AndroidEntryPoint
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
+import java.io.File
+import java.io.FileOutputStream
+import java.util.*
 
 @AndroidEntryPoint
-public class FavouritesFragment extends Fragment {
+class FavouritesFragment : Fragment() {
 
-    private static final String TAG = "FavouritesFragment";
-    private FragmentFavouritesBinding binding;
-
-    private FavouriteViewModel favouriteViewModel;
-
-    private ArrayList<Favourite> searchedFavourites = new ArrayList<>();
-
-    private FavouriteAdapter adapter;
-
-    private int removedPos;
-    private boolean searching = false, removed = false;
-
-    public FavouritesFragment() {
-        // Required empty public constructor
+    companion object {
+        private const val TAG = "FavouritesFragment"
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentFavouritesBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    private var _binding: FragmentFavouritesBinding? = null
+    private val binding get() = _binding!!
+
+    private var favouriteViewModel: FavouriteViewModel? = null
+    private val searchedFavourites = ArrayList<Favourite>()
+    private var adapter: FavouriteAdapter? = null
+    private var removedPos = 0
+    private var searching = false
+    private var removed = false
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        _binding = FragmentFavouritesBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
-
-        buildRecyclerView();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        favouriteViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)).get(FavouriteViewModel::class.java)
+        buildRecyclerView()
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        favouriteViewModel.getAllFavourites().observe(getViewLifecycleOwner(), favourites -> {
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        favouriteViewModel!!.allFavourites.observe(viewLifecycleOwner, { favourites: List<Favourite?> ->
             if (favourites.isEmpty()) {
-                binding.tvFDescription.setVisibility(View.VISIBLE);
-                binding.favourites.setVisibility(View.INVISIBLE);
-                setHasOptionsMenu(false);
+                binding.tvFDescription.visibility = View.VISIBLE
+                binding.favourites.visibility = View.INVISIBLE
+                setHasOptionsMenu(false)
             } else {
-                binding.tvFDescription.setVisibility(View.INVISIBLE);
-                binding.favourites.setVisibility(View.VISIBLE);
-                setHasOptionsMenu(true);
+                binding.tvFDescription.visibility = View.INVISIBLE
+                binding.favourites.visibility = View.VISIBLE
+                setHasOptionsMenu(true)
             }
-            if (searching)
-                adapter.setFavourites(searchedFavourites);
-            else
-                adapter.setFavourites(favourites);
-            if (removed)
-                adapter.notifyItemRemoved(removedPos);
-            else
-                adapter.notifyDataSetChanged();
-            removed = false;
-        });
+            if (searching) adapter!!.setFavourites(searchedFavourites) else adapter!!.setFavourites(favourites)
+            if (removed) adapter!!.notifyItemRemoved(removedPos) else adapter!!.notifyDataSetChanged()
+            removed = false
+        })
     }
 
-    private void buildRecyclerView() {
-        binding.favourites.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-        adapter = new FavouriteAdapter();
-        adapter.setListener(new FavouriteAdapter.FavouriteListener() {
-            @Override
-            public void onItemClicked(int pos, ImageView pokemon, TextView name) {
-                showDetails(adapter.getFavouriteAt(pos).getPokemon(), pokemon, name);
+    private fun buildRecyclerView() {
+        binding.favourites.setHasFixedSize(true)
+        val layoutManager = LinearLayoutManager(requireContext())
+        adapter = FavouriteAdapter()
+        adapter!!.setListener(object : FavouriteListener {
+            override fun onItemClicked(pos: Int, pokemon: ImageView, name: TextView) {
+                showDetails(adapter!!.getFavouriteAt(pos).pokemon, pokemon, name)
             }
 
-            @Override
-            public void onShareClicked(int pos, ImageView imageView) {
-                sharePokemon(pos, imageView);
+            override fun onShareClicked(pos: Int, imageView: ImageView) {
+                sharePokemon(pos, imageView)
             }
-        });
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
+        })
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
             }
 
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                Favourite favourite = adapter.getFavouriteAt(viewHolder.getAdapterPosition());
-                removeFromFav(favourite, viewHolder.getAdapterPosition());
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val favourite = adapter!!.getFavouriteAt(viewHolder.adapterPosition)
+                removeFromFav(favourite, viewHolder.adapterPosition)
             }
 
-            @Override
-            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+                RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                         .addSwipeLeftBackgroundColor(Color.parseColor("#EB3939"))
                         .addSwipeLeftActionIcon(R.drawable.delete_icon)
                         .create()
-                        .decorate();
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                        .decorate()
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
-        }).attachToRecyclerView(binding.favourites);
-        binding.favourites.setLayoutManager(layoutManager);
-        binding.favourites.setAdapter(adapter);
+        }).attachToRecyclerView(binding.favourites)
+        binding.favourites.layoutManager = layoutManager
+        binding.favourites.adapter = adapter
     }
 
-    private void removeFromFav(Favourite favourite, int pos) {
-        Log.i(TAG, "removeFromFav: id=" + favourite.getId());
-        favouriteViewModel.delete(favourite);
-        if (searching)
-            searchedFavourites.remove(pos);
-        StyleableToast.makeText(requireContext(), firstLetterToUppercase(favourite.getPokemon().getName()) + " is removed from Favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
-        removedPos = pos;
-        removed = true;
+    private fun removeFromFav(favourite: Favourite, pos: Int) {
+        Log.i(TAG, "removeFromFav: id=" + favourite.id)
+        favouriteViewModel!!.delete(favourite)
+        if (searching) searchedFavourites.removeAt(pos)
+        StyleableToast.makeText(requireContext(), firstLetterToUppercase(favourite.pokemon.name) + " is removed from Favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
+        removedPos = pos
+        removed = true
     }
 
-    private void sharePokemon(int pos, ImageView imageView) {
-        Pokemon pokemon = adapter.getFavouriteAt(pos).getPokemon();
-        Bitmap bitmap = getBitmapFromView(imageView);
+    private fun sharePokemon(pos: Int, imageView: ImageView) {
+        val pokemon = adapter!!.getFavouriteAt(pos).pokemon
+        val bitmap = getBitmapFromView(imageView)
         try {
-            File file = new File(requireActivity().getExternalCacheDir(), firstLetterToUppercase(pokemon.getName()) + ".png");
-            FileOutputStream outputStream = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
-            file.setReadable(true, false);
-            Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.putExtra(Intent.EXTRA_TEXT, getPokemonDetailsAsString(pokemon));
-            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(requireContext(), requireContext().getApplicationContext().getPackageName() + ".provider", file));
-            intent.setType("image/png");
-            startActivity(Intent.createChooser(intent, "Share Pokémon via"));
-        } catch (Exception e) {
-            e.printStackTrace();
+            val file = File(requireActivity().externalCacheDir, firstLetterToUppercase(pokemon.name) + ".png")
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+            file.setReadable(true, false)
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            intent.putExtra(Intent.EXTRA_TEXT, getPokemonDetailsAsString(pokemon))
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(requireContext(), requireContext().applicationContext.packageName + ".provider", file))
+            intent.type = "image/png"
+            startActivity(Intent.createChooser(intent, "Share Pokémon via"))
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    private String getPokemonDetailsAsString(Pokemon pokemon) {
-        String details = "ID : " + pokemon.getId() + "\n" +
-                "Pokémon : " + firstLetterToUppercase(pokemon.getName()) + "\n";
-        if (pokemon.getTypes().size() == 1)
-            details = details + "Type : " + firstLetterToUppercase(pokemon.getTypes().get(0).getType().getName()) + "\n";
-        else
-            details = details + "Types : " + firstLetterToUppercase(pokemon.getTypes().get(0).getType().getName()) + ", " + firstLetterToUppercase(pokemon.getTypes().get(1).getType().getName()) + "\n";
-        details = details + "Speed : " + pokemon.getStats().get(0).getBase_stat() + "\n"
-                + "Hp : " + pokemon.getStats().get(5).getBase_stat() + "\n"
-                + "Attack : " + pokemon.getStats().get(4).getBase_stat() + "\n"
-                + "Defense : " + pokemon.getStats().get(3).getBase_stat() + "\n"
-                + "Sp. Attack : " + pokemon.getStats().get(2).getBase_stat() + "\n"
-                + "Sp. Defense : " + pokemon.getStats().get(1).getBase_stat();
-        return details;
+    private fun getPokemonDetailsAsString(pokemon: Pokemon): String {
+        var details = """
+            ID : ${pokemon.id}
+            Pokémon : ${firstLetterToUppercase(pokemon.name)}
+
+            """.trimIndent()
+        details = if (pokemon.types.size == 1) """
+     ${details}Type : ${firstLetterToUppercase(pokemon.types[0].type.name)}
+
+     """.trimIndent() else """
+     ${details}Types : ${firstLetterToUppercase(pokemon.types[0].type.name)}, ${firstLetterToUppercase(pokemon.types[1].type.name)}
+
+     """.trimIndent()
+        details = """
+            ${details}Speed : ${pokemon.stats[0].base_stat}
+            Hp : ${pokemon.stats[5].base_stat}
+            Attack : ${pokemon.stats[4].base_stat}
+            Defense : ${pokemon.stats[3].base_stat}
+            Sp. Attack : ${pokemon.stats[2].base_stat}
+            Sp. Defense : ${pokemon.stats[1].base_stat}
+            """.trimIndent()
+        return details
     }
 
-    private Bitmap getBitmapFromView(View view) {
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        Drawable bgDrawable = view.getBackground();
+    private fun getBitmapFromView(view: View): Bitmap {
+        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(returnedBitmap)
+        val bgDrawable = view.background
         if (bgDrawable != null) {
-            bgDrawable.draw(canvas);
+            bgDrawable.draw(canvas)
         } else {
-            canvas.drawColor(Color.WHITE);
+            canvas.drawColor(Color.WHITE)
         }
-        view.draw(canvas);
-        return returnedBitmap;
+        view.draw(canvas)
+        return returnedBitmap
     }
 
-    private void showDetails(Pokemon pokemon, ImageView pokemonIv, TextView nameIv) {
-        if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
-            Intent intent = new Intent(requireActivity(), PokemonDetailsActivity.class);
-            Gson gson = new Gson();
-            String pokemonJson = gson.toJson(pokemon);
-            intent.putExtra("pokemonJson", pokemonJson);
-            Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
-            Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair);
-            startActivity(intent, options.toBundle());
+    private fun showDetails(pokemon: Pokemon, pokemonIv: ImageView, nameIv: TextView) {
+        if (pokemon.id != 0 && pokemon.sprites != null) {
+            val intent = Intent(requireActivity(), PokemonDetailsActivity::class.java)
+            val gson = Gson()
+            val pokemonJson = gson.toJson(pokemon)
+            intent.putExtra("pokemonJson", pokemonJson)
+            val imagePair = Pair<View, String>(pokemonIv, "pokemonImg")
+            val namePair = Pair<View, String>(nameIv, "pokemonName")
+            val options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imagePair, namePair)
+            startActivity(intent, options.toBundle())
         }
     }
 
-    private void searchFavouritesByName(String name) {
-        searchedFavourites.clear();
-
-        Favourite favouriteS;
-        for (Favourite favourite : favouriteViewModel.getAllFavourites().getValue()) {
-            if (favourite.getPokemon().getName().trim().contains(name)) {
-                favouriteS = new Favourite(favourite.getPokemon());
-                favouriteS.setId(favourite.getId());
-                searchedFavourites.add(favouriteS);
+    private fun searchFavouritesByName(name: String) {
+        searchedFavourites.clear()
+        var favouriteS: Favourite
+        for (favourite in favouriteViewModel!!.allFavourites.value!!) {
+            if (favourite.pokemon.name.trim { it <= ' ' }.contains(name)) {
+                favouriteS = Favourite(favourite.pokemon)
+                favouriteS.id = favourite.id
+                searchedFavourites.add(favouriteS)
             }
         }
-
-        adapter.setFavourites(searchedFavourites);
-        adapter.notifyDataSetChanged();
+        adapter!!.setFavourites(searchedFavourites)
+        adapter!!.notifyDataSetChanged()
     }
 
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.favourites_menu, menu);
-        MenuItem item = menu.findItem(R.id.searchFavourites);
-        SearchView searchView = (SearchView) item.getActionView();
-        searchView.setQueryHint("Search Favourites");
-        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        searchView.setOnCloseListener(() -> {
-            searching = false;
-            return false;
-        });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                searching = true;
-                if (query.length() == 0) {
-                    searchedFavourites.clear();
-                    adapter.setFavourites(favouriteViewModel.getAllFavourites().getValue());
-                    adapter.notifyDataSetChanged();
-                } else
-                    searchFavouritesByName(query.toLowerCase().trim());
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                searching = true;
-                if (newText.length() == 0) {
-                    searchedFavourites.clear();
-                    adapter.setFavourites(favouriteViewModel.getAllFavourites().getValue());
-                    adapter.notifyDataSetChanged();
-                } else
-                    searchFavouritesByName(newText.toLowerCase().trim());
-                return true;
-            }
-        });
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.deleteAll:
-                favouriteViewModel.deleteAllFavourites();
-                break;
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.clear()
+        inflater.inflate(R.menu.favourites_menu, menu)
+        val item = menu.findItem(R.id.searchFavourites)
+        val searchView = item.actionView as SearchView
+        searchView.queryHint = "Search Favourites"
+        searchView.imeOptions = EditorInfo.IME_ACTION_DONE
+        searchView.setOnCloseListener {
+            searching = false
+            false
         }
-        return super.onOptionsItemSelected(item);
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                searching = true
+                if (query.isEmpty()) {
+                    searchedFavourites.clear()
+                    adapter!!.setFavourites(favouriteViewModel!!.allFavourites.value)
+                    adapter!!.notifyDataSetChanged()
+                } else searchFavouritesByName(query.toLowerCase().trim { it <= ' ' })
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                searching = true
+                if (newText.isEmpty()) {
+                    searchedFavourites.clear()
+                    adapter!!.setFavourites(favouriteViewModel!!.allFavourites.value)
+                    adapter!!.notifyDataSetChanged()
+                } else searchFavouritesByName(newText.toLowerCase().trim { it <= ' ' })
+                return true
+            }
+        })
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        binding = null;
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.deleteAll -> favouriteViewModel!!.deleteAllFavourites()
+        }
+        return super.onOptionsItemSelected(item)
     }
 
-    private String firstLetterToUppercase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun firstLetterToUppercase(string: String): String {
+        return string.substring(0, 1).toUpperCase() + string.substring(1)
     }
 }

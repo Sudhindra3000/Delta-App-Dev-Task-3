@@ -1,81 +1,67 @@
-package com.example.deltatask3.fragments;
+package com.example.deltatask3.fragments
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import com.example.deltatask3.activities.PokemonsActivity;
-import com.example.deltatask3.databinding.FragmentRegionsBinding;
-
-import java.util.ArrayList;
-
-import dagger.hilt.android.AndroidEntryPoint;
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import com.example.deltatask3.activities.PokemonsActivity
+import com.example.deltatask3.databinding.FragmentRegionsBinding
+import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
-public class RegionsFragment extends Fragment implements View.OnClickListener {
+class RegionsFragment : Fragment(), View.OnClickListener {
 
-    private FragmentRegionsBinding binding;
-    private ArrayList<String> regions;
+    private var _binding: FragmentRegionsBinding? = null
+    private val binding get() = _binding!!
 
-    public RegionsFragment() {
-        // Required empty public constructor
+    private var regions: ArrayList<String>? = null
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        _binding = FragmentRegionsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentRegionsBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initButtons()
+        initRegions()
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        initButtons();
-        initRegions();
+    private fun initButtons() {
+        binding.btA.setOnClickListener { v: View -> onClick(v) }
+        binding.btH.setOnClickListener { v: View -> onClick(v) }
+        binding.btJ.setOnClickListener { v: View -> onClick(v) }
+        binding.btKl.setOnClickListener { v: View -> onClick(v) }
+        binding.btKt.setOnClickListener { v: View -> onClick(v) }
+        binding.btS.setOnClickListener { v: View -> onClick(v) }
+        binding.btU.setOnClickListener { v: View -> onClick(v) }
     }
 
-    private void initButtons() {
-        binding.btA.setOnClickListener(this::onClick);
-        binding.btH.setOnClickListener(this::onClick);
-        binding.btJ.setOnClickListener(this::onClick);
-        binding.btKl.setOnClickListener(this::onClick);
-        binding.btKt.setOnClickListener(this::onClick);
-        binding.btS.setOnClickListener(this::onClick);
-        binding.btU.setOnClickListener(this::onClick);
+    private fun initRegions() {
+        regions = ArrayList()
+        regions!!.add("Kanto")
+        regions!!.add("Johto")
+        regions!!.add("Hoenn")
+        regions!!.add("Sinnoh")
+        regions!!.add("Unova")
+        regions!!.add("Kalos")
+        regions!!.add("Alola")
     }
 
-    private void initRegions() {
-        regions = new ArrayList<>();
-        regions.add("Kanto");
-        regions.add("Johto");
-        regions.add("Hoenn");
-        regions.add("Sinnoh");
-        regions.add("Unova");
-        regions.add("Kalos");
-        regions.add("Alola");
+    override fun onClick(v: View) {
+        val intent = Intent(activity, PokemonsActivity::class.java)
+        val REGIONS = 45
+        intent.putExtra("mode", REGIONS)
+        intent.putExtra("regionID", v.tag.toString().toInt())
+        intent.putExtra("regionName", regions!![v.tag.toString().toInt()])
+        startActivity(intent)
     }
 
-    @Override
-    public void onClick(View v) {
-        Intent intent = new Intent(getActivity(), PokemonsActivity.class);
-        int REGIONS = 45;
-        intent.putExtra("mode", REGIONS);
-        intent.putExtra("regionID", Integer.parseInt(v.getTag().toString()));
-        intent.putExtra("regionName", regions.get(Integer.parseInt(v.getTag().toString())));
-        startActivity(intent);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        binding = null;
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
