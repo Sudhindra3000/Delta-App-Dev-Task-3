@@ -25,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,7 +36,6 @@ import com.example.deltatask3.adapters.FavouriteAdapter;
 import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentFavouritesBinding;
 import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.viewmodels.AppViewModel;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
@@ -45,7 +43,6 @@ import com.muddzdev.styleabletoast.StyleableToast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
@@ -56,14 +53,11 @@ public class FavouritesFragment extends Fragment {
     private static final String TAG = "FavouritesFragment";
     private FragmentFavouritesBinding binding;
 
-    private AppViewModel appViewModel;
     private FavouriteViewModel favouriteViewModel;
 
-    private ArrayList<Favourite> searchedFavourites;
+    private ArrayList<Favourite> searchedFavourites = new ArrayList<>();
 
     private FavouriteAdapter adapter;
-    private LinearLayoutManager layoutManager;
-    private SearchView searchView;
 
     private int removedPos;
     private boolean searching = false, removed = false;
@@ -82,10 +76,7 @@ public class FavouritesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-        appViewModel.setCurrentTitle("Favourites");
         favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
-        searchedFavourites = new ArrayList<>();
 
         buildRecyclerView();
     }
@@ -93,34 +84,31 @@ public class FavouritesFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        favouriteViewModel.getAllFavourites().observe(getViewLifecycleOwner(), new Observer<List<Favourite>>() {
-            @Override
-            public void onChanged(List<Favourite> favourites) {
-                if (favourites.isEmpty()) {
-                    binding.tvFDescription.setVisibility(View.VISIBLE);
-                    binding.favourites.setVisibility(View.INVISIBLE);
-                    setHasOptionsMenu(false);
-                } else {
-                    binding.tvFDescription.setVisibility(View.INVISIBLE);
-                    binding.favourites.setVisibility(View.VISIBLE);
-                    setHasOptionsMenu(true);
-                }
-                if (searching)
-                    adapter.setFavourites(searchedFavourites);
-                else
-                    adapter.setFavourites(favourites);
-                if (removed)
-                    adapter.notifyItemRemoved(removedPos);
-                else
-                    adapter.notifyDataSetChanged();
-                removed = false;
+        favouriteViewModel.getAllFavourites().observe(getViewLifecycleOwner(), favourites -> {
+            if (favourites.isEmpty()) {
+                binding.tvFDescription.setVisibility(View.VISIBLE);
+                binding.favourites.setVisibility(View.INVISIBLE);
+                setHasOptionsMenu(false);
+            } else {
+                binding.tvFDescription.setVisibility(View.INVISIBLE);
+                binding.favourites.setVisibility(View.VISIBLE);
+                setHasOptionsMenu(true);
             }
+            if (searching)
+                adapter.setFavourites(searchedFavourites);
+            else
+                adapter.setFavourites(favourites);
+            if (removed)
+                adapter.notifyItemRemoved(removedPos);
+            else
+                adapter.notifyDataSetChanged();
+            removed = false;
         });
     }
 
     private void buildRecyclerView() {
         binding.favourites.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(requireContext());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         adapter = new FavouriteAdapter();
         adapter.setListener(new FavouriteAdapter.FavouriteListener() {
             @Override
@@ -253,15 +241,12 @@ public class FavouritesFragment extends Fragment {
         menu.clear();
         inflater.inflate(R.menu.favourites_menu, menu);
         MenuItem item = menu.findItem(R.id.searchFavourites);
-        searchView = (SearchView) item.getActionView();
+        SearchView searchView = (SearchView) item.getActionView();
         searchView.setQueryHint("Search Favourites");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                searching = false;
-                return false;
-            }
+        searchView.setOnCloseListener(() -> {
+            searching = false;
+            return false;
         });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

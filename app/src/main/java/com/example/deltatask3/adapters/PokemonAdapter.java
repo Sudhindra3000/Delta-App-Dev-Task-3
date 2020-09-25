@@ -1,10 +1,7 @@
 package com.example.deltatask3.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,12 +39,7 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonV
         public PokemonViewHolder(@NonNull PokemonRowBinding pokemonRowBinding, PokemonAdapterListener listener) {
             super(pokemonRowBinding.getRoot());
             binding = pokemonRowBinding;
-            binding.row.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onItemClicked(getAdapterPosition(), binding.ivPokemon,binding.tvName);
-                }
-            });
+            binding.row.setOnClickListener(v -> listener.onItemClicked(getAdapterPosition(), binding.ivPokemon, binding.tvName));
         }
     }
 
@@ -65,7 +57,7 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonV
 
         if (pokemon.getSprites() != null) {
             String urlSprite = pokemon.getSprites().getFront_default();
-            if (urlSprite!=null && !urlSprite.isEmpty())
+            if (urlSprite != null && !urlSprite.isEmpty())
                 Picasso.get().load(urlSprite).placeholder(R.drawable.placeholder_image).into(holder.binding.ivPokemon);
         }
         holder.binding.tvId.setText(String.valueOf(pokemon.getId()));
@@ -77,11 +69,11 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonV
         return pokemons.size();
     }
 
-    private String firstLetterToUppercase(String string){
-        return string.substring(0,1).toUpperCase()+string.substring(1);
+    private String firstLetterToUppercase(String string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
-    public Pokemon getPokemonAt(int pos){
+    public Pokemon getPokemonAt(int pos) {
         return pokemons.get(pos);
     }
 }

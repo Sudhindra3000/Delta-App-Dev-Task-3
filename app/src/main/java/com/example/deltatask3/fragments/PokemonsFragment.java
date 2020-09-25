@@ -35,7 +35,6 @@ import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentPokemonsBinding;
 import com.example.deltatask3.utils.Pokemon;
 import com.example.deltatask3.utils.SearchResult;
-import com.example.deltatask3.viewmodels.AppViewModel;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
@@ -61,10 +60,10 @@ public class PokemonsFragment extends Fragment {
     @Inject
     PokemonApi pokemonApi;
 
-    private ArrayList<String> names;
-    private ArrayList<Pokemon> allPokemons;
-    private ArrayList<Favourite> favourites;
-    private ArrayList<Pokemon> searchedPokemon;
+    private ArrayList<String> names = new ArrayList<>();
+    private ArrayList<Pokemon> allPokemons = new ArrayList<>();
+    private ArrayList<Favourite> favourites = new ArrayList<>();
+    private ArrayList<Pokemon> searchedPokemon = new ArrayList<>();
 
     private PokemonAdapter pokemonAdapter;
     private LinearLayoutManager layoutManager;
@@ -89,15 +88,7 @@ public class PokemonsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        AppViewModel appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-        appViewModel.setCurrentTitle("Pokémon");
         favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
-
-        names = new ArrayList<>();
-
-        allPokemons = new ArrayList<>();
-        favourites = new ArrayList<>();
-        searchedPokemon = new ArrayList<>();
 
         buildRecyclerView();
         getMorePokemon();

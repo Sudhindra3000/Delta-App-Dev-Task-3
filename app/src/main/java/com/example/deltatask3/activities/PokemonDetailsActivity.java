@@ -40,8 +40,8 @@ public class PokemonDetailsActivity extends AppCompatActivity {
     private String evolutionChainURL;
     private Pokemon pokemon;
 
-    private ArrayList<String> names;
-    private ArrayList<String> urls;
+    private ArrayList<String> names = new ArrayList<>();
+    private ArrayList<String> urls = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +50,9 @@ public class PokemonDetailsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-
         getWindow().getSharedElementEnterTransition().setDuration(500);
         getWindow().setEnterTransition(new Explode());
         getWindow().getEnterTransition().setDuration(500);
-        names = new ArrayList<>();
-        urls = new ArrayList<>();
 
         Intent intent = getIntent();
         String pokemonJson = intent.getStringExtra("pokemonJson");

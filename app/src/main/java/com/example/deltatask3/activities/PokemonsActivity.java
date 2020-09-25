@@ -20,7 +20,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -40,7 +39,6 @@ import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -54,27 +52,26 @@ import retrofit2.Response;
 public class PokemonsActivity extends AppCompatActivity {
 
     private static final String TAG = "PokemonsActivity";
-    private final int REGIONS = 45;
     private ActivityPokemonsBinding binding;
 
-    private int mode, offset = 0;
+    private int offset = 0;
 
     private FavouriteViewModel favouriteViewModel;
-    private ArrayList<Favourite> favourites;
+    private ArrayList<Favourite> favourites = new ArrayList<>();
 
     @Inject
     PokemonApi pokemonApi;
 
     private LinearLayoutManager layoutManager;
     private PokemonAdapter pokemonAdapter;
-    private ArrayList<Pokemon> pokemons, searchedPokemon;
+    private ArrayList<Pokemon> pokemons = new ArrayList<>(), searchedPokemon = new ArrayList<>();
     private SearchView searchView;
     private boolean loading = true, searching = false, paginate = true;
 
     private int regionID;
     private Pokedex pokedex;
-    private ArrayList<Pokedex> pokedexes;
-    private ArrayList<String> names;
+    private ArrayList<Pokedex> pokedexes = new ArrayList<>();
+    private ArrayList<String> names = new ArrayList<>();
 
     private int typeID;
 
@@ -94,22 +91,14 @@ public class PokemonsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         favouriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavouriteViewModel.class);
-        favouriteViewModel.getAllFavourites().observe(this, new Observer<List<Favourite>>() {
-            @Override
-            public void onChanged(List<Favourite> newFavourites) {
-                favourites.clear();
-                favourites.addAll(newFavourites);
-            }
+        favouriteViewModel.getAllFavourites().observe(this, newFavourites -> {
+            favourites.clear();
+            favourites.addAll(newFavourites);
         });
-        pokedex = new Pokedex();
-        pokedexes = new ArrayList<>();
-        pokemons = new ArrayList<>();
-        searchedPokemon = new ArrayList<>();
-        favourites = new ArrayList<>();
-        names = new ArrayList<>();
 
-        mode = getIntent().getIntExtra("mode", -1);
+        int mode = getIntent().getIntExtra("mode", -1);
 
+        int REGIONS = 45;
         if (mode == REGIONS) {
             regionID = getIntent().getIntExtra("regionID", 0);
             regionID++;
@@ -131,12 +120,7 @@ public class PokemonsActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         pokemonAdapter = new PokemonAdapter();
         pokemonAdapter.setPokemons(pokemons);
-        pokemonAdapter.setListener(new PokemonAdapter.PokemonAdapterListener() {
-            @Override
-            public void onItemClicked(int position, ImageView pokemonIv, TextView nameIv) {
-                showDetails(position, pokemonIv, nameIv);
-            }
-        });
+        pokemonAdapter.setListener(this::showDetails);
         binding.pokemonsList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {

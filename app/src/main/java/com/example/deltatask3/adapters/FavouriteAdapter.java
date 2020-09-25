@@ -1,7 +1,6 @@
 package com.example.deltatask3.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,7 +14,6 @@ import com.example.deltatask3.databinding.FavouriteRowBinding;
 import com.example.deltatask3.utils.Pokemon;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.FavouriteViewHolder> {
@@ -44,18 +42,8 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
         public FavouriteViewHolder(@NonNull FavouriteRowBinding favouriteRowBinding, FavouriteListener listener) {
             super(favouriteRowBinding.getRoot());
             binding = favouriteRowBinding;
-            binding.favRow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onItemClicked(getAdapterPosition(), binding.ivF, binding.tvFName);
-                }
-            });
-            binding.shareButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onShareClicked(getAdapterPosition(), binding.ivF);
-                }
-            });
+            binding.favRow.setOnClickListener(v -> listener.onItemClicked(getAdapterPosition(), binding.ivF, binding.tvFName));
+            binding.shareButton.setOnClickListener(v -> listener.onShareClicked(getAdapterPosition(), binding.ivF));
         }
     }
 

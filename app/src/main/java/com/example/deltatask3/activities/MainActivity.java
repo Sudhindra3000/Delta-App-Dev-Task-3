@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.Fragment;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.databinding.ActivityMainBinding;
@@ -19,8 +19,9 @@ import com.example.deltatask3.fragments.PokemonsFragment;
 import com.example.deltatask3.fragments.RegionsFragment;
 import com.example.deltatask3.fragments.SearchFragment;
 import com.example.deltatask3.fragments.TypesFragment;
-import com.example.deltatask3.viewmodels.AppViewModel;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -28,9 +29,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ActivityMainBinding binding;
-    private AppViewModel appViewModel;
-    private ActionBarDrawerToggle drawerToggle;
-    private String currentTitle;
+    private String currentTitle = "Pokémon";
+
+    private ArrayList<Fragment> fragments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         setSupportActionBar(binding.toolbar);
 
-        appViewModel = new ViewModelProvider(this).get(AppViewModel.class);
-        appViewModel.getCurrentTitle().observe(this, s -> {
-            currentTitle = s;
-            getSupportActionBar().setTitle(s);
-        });
-
-        drawerToggle = new ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
         binding.navView.setNavigationItemSelectedListener(this);
         binding.drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
@@ -56,6 +51,69 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new PokemonsFragment()).commit();
             binding.navView.setCheckedItem(R.id.po);
         }
+
+        initFragments();
+    }
+
+    private void initFragments() {
+        fragments.add(new PokemonsFragment());
+        fragments.add(new ItemsFragment());
+        fragments.add(new LocationsFragment());
+        fragments.add(new TypesFragment());
+        fragments.add(new RegionsFragment());
+        fragments.add(new SearchFragment());
+        fragments.add(new FavouritesFragment());
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.po:
+                if (!currentTitle.equals("Pokémon")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(0)).commit();
+                    currentTitle = "Pokémon";
+                }
+                break;
+            case R.id.io:
+                if (!currentTitle.equals("Items")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(1)).commit();
+                    currentTitle = "Items";
+                }
+                break;
+            case R.id.lo:
+                if (!currentTitle.equals("Locations")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(2)).commit();
+                    currentTitle = "Locations";
+                }
+                break;
+            case R.id.to:
+                if (!currentTitle.equals("Types")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(3)).commit();
+                    currentTitle = "Types";
+                }
+                break;
+            case R.id.ro:
+                if (!currentTitle.equals("Regions")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(4)).commit();
+                    currentTitle = "Regions";
+                }
+                break;
+            case R.id.so:
+                if (!currentTitle.equals("Search")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(5)).commit();
+                    currentTitle = "Search";
+                }
+                break;
+            case R.id.fo:
+                if (!currentTitle.equals("Favourites")) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(6)).commit();
+                    currentTitle = "Favourites";
+                }
+                break;
+        }
+        getSupportActionBar().setTitle(currentTitle);
+        onBackPressed();
+        return true;
     }
 
     @Override
@@ -66,41 +124,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.po:
-                if (!currentTitle.equals("Pokémon"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new PokemonsFragment()).commit();
-                break;
-            case R.id.io:
-                if (!currentTitle.equals("Items"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new ItemsFragment()).commit();
-                break;
-            case R.id.lo:
-                if (!currentTitle.equals("Locations"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new LocationsFragment()).commit();
-                break;
-            case R.id.to:
-                if (!currentTitle.equals("Types"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new TypesFragment()).commit();
-                break;
-            case R.id.ro:
-                if (!currentTitle.equals("Regions"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new RegionsFragment()).commit();
-                break;
-            case R.id.so:
-                if (!currentTitle.equals("Search"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new SearchFragment()).commit();
-                break;
-            case R.id.fo:
-                if (!currentTitle.equals("Favourites"))
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new FavouritesFragment()).commit();
-                break;
-        }
-        onBackPressed();
-        return true;
     }
 }

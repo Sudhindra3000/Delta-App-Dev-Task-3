@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,7 +23,6 @@ import com.example.deltatask3.api.PokemonApi;
 import com.example.deltatask3.databinding.FragmentItemsBinding;
 import com.example.deltatask3.utils.ItemLocation;
 import com.example.deltatask3.utils.SearchResult;
-import com.example.deltatask3.viewmodels.AppViewModel;
 
 import java.util.ArrayList;
 
@@ -41,13 +39,11 @@ public class ItemsFragment extends Fragment {
     private static final String TAG = "ItemsFragment";
     private FragmentItemsBinding binding;
 
-    private AppViewModel appViewModel;
-
     @Inject
     PokemonApi pokemonApi;
 
-    private ArrayList<String> names;
-    private ArrayList<ItemLocation> items, searchedItems;
+    private ArrayList<String> names = new ArrayList<>();
+    private ArrayList<ItemLocation> items = new ArrayList<>(), searchedItems = new ArrayList<>();
 
     private ItemLocationAdapter adapter;
     private LinearLayoutManager layoutManager;
@@ -70,12 +66,6 @@ public class ItemsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-        appViewModel.setCurrentTitle("Items");
-
-        names = new ArrayList<>();
-        items = new ArrayList<>();
-        searchedItems = new ArrayList<>();
 
         buildRecyclerView();
         getItems();

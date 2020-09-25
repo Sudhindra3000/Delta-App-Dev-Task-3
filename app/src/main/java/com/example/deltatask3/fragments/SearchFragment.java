@@ -37,7 +37,6 @@ import com.example.deltatask3.database.Favourite;
 import com.example.deltatask3.databinding.FragmentSearchBinding;
 import com.example.deltatask3.utils.ItemLocation;
 import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.viewmodels.AppViewModel;
 import com.example.deltatask3.viewmodels.FavouriteViewModel;
 import com.google.gson.Gson;
 import com.muddzdev.styleabletoast.StyleableToast;
@@ -58,14 +57,13 @@ public class SearchFragment extends Fragment {
     private static final String TAG = "SearchFragment";
     private FragmentSearchBinding binding;
 
-    private AppViewModel appViewModel;
     private FavouriteViewModel favouriteViewModel;
 
     @Inject
     PokemonApi pokemonApi;
 
-    private ArrayList<Pokemon> pokemons;
-    private ArrayList<ItemLocation> locations, items;
+    private ArrayList<Pokemon> pokemons = new ArrayList<>();
+    private ArrayList<ItemLocation> locations = new ArrayList<>(), items = new ArrayList<>();
 
     private PokemonAdapter pokemonAdapter;
     private ItemLocationAdapter locationAdapter, itemAdapter;
@@ -81,13 +79,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-        appViewModel.setCurrentTitle("Search");
         favouriteViewModel = new ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())).get(FavouriteViewModel.class);
-
-        pokemons = new ArrayList<>();
-        items = new ArrayList<>();
-        locations = new ArrayList<>();
 
         buildRecyclerView();
     }
@@ -97,12 +89,7 @@ public class SearchFragment extends Fragment {
         LinearLayoutManager pokemonLayoutManager = new LinearLayoutManager(requireContext());
         pokemonAdapter = new PokemonAdapter();
         pokemonAdapter.setPokemons(pokemons);
-        pokemonAdapter.setListener(new PokemonAdapter.PokemonAdapterListener() {
-            @Override
-            public void onItemClicked(int position, ImageView pokemon, TextView name) {
-                showDetails(pokemon, name);
-            }
-        });
+        pokemonAdapter.setListener((position, pokemon, name) -> showDetails(pokemon, name));
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -254,12 +241,9 @@ public class SearchFragment extends Fragment {
         searchView.setQueryHint("Enter ID");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setInputType(InputType.TYPE_CLASS_NUMBER);
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                binding.tvS.setVisibility(View.VISIBLE);
-                return false;
-            }
+        searchView.setOnCloseListener(() -> {
+            binding.tvS.setVisibility(View.VISIBLE);
+            return false;
         });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

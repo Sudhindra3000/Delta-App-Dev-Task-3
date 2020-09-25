@@ -9,11 +9,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.deltatask3.activities.PokemonsActivity;
 import com.example.deltatask3.databinding.FragmentTypesBinding;
-import com.example.deltatask3.viewmodels.AppViewModel;
 
 import java.util.ArrayList;
 
@@ -22,8 +20,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class TypesFragment extends Fragment implements View.OnClickListener {
 
-    private final int TYPES = 23;
-    private AppViewModel appViewModel;
     private FragmentTypesBinding binding;
     private ArrayList<String> types;
 
@@ -41,8 +37,6 @@ public class TypesFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel = new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-        appViewModel.setCurrentTitle("Types");
 
         initButtons();
         initTypes();
@@ -94,6 +88,7 @@ public class TypesFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         Intent intent = new Intent(getActivity(), PokemonsActivity.class);
+        int TYPES = 23;
         intent.putExtra("mode", TYPES);
         intent.putExtra("typeID", Integer.parseInt(v.getTag().toString()));
         intent.putExtra("typeName", types.get(Integer.parseInt(v.getTag().toString()) - 1));

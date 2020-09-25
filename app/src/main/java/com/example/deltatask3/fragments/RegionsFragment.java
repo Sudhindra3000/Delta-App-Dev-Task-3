@@ -9,11 +9,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.deltatask3.activities.PokemonsActivity;
 import com.example.deltatask3.databinding.FragmentRegionsBinding;
-import com.example.deltatask3.viewmodels.AppViewModel;
 
 import java.util.ArrayList;
 
@@ -22,11 +20,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class RegionsFragment extends Fragment implements View.OnClickListener {
 
-    private final int REGIONS = 45;
     private FragmentRegionsBinding binding;
     private ArrayList<String> regions;
-
-    private AppViewModel appViewModel;
 
     public RegionsFragment() {
         // Required empty public constructor
@@ -35,21 +30,19 @@ public class RegionsFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding=FragmentRegionsBinding.inflate(inflater,container,false);
+        binding = FragmentRegionsBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        appViewModel=new ViewModelProvider(requireActivity()).get(AppViewModel.class);
-        appViewModel.setCurrentTitle("Regions");
 
         initButtons();
         initRegions();
     }
 
-    private void initButtons(){
+    private void initButtons() {
         binding.btA.setOnClickListener(this::onClick);
         binding.btH.setOnClickListener(this::onClick);
         binding.btJ.setOnClickListener(this::onClick);
@@ -59,8 +52,8 @@ public class RegionsFragment extends Fragment implements View.OnClickListener {
         binding.btU.setOnClickListener(this::onClick);
     }
 
-    private void initRegions(){
-        regions=new ArrayList<>();
+    private void initRegions() {
+        regions = new ArrayList<>();
         regions.add("Kanto");
         regions.add("Johto");
         regions.add("Hoenn");
@@ -72,16 +65,17 @@ public class RegionsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        Intent intent=new Intent(getActivity(), PokemonsActivity.class);
-        intent.putExtra("mode",REGIONS);
-        intent.putExtra("regionID",Integer.parseInt(v.getTag().toString()));
-        intent.putExtra("regionName",regions.get(Integer.parseInt(v.getTag().toString())));
+        Intent intent = new Intent(getActivity(), PokemonsActivity.class);
+        int REGIONS = 45;
+        intent.putExtra("mode", REGIONS);
+        intent.putExtra("regionID", Integer.parseInt(v.getTag().toString()));
+        intent.putExtra("regionName", regions.get(Integer.parseInt(v.getTag().toString())));
         startActivity(intent);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        binding=null;
+        binding = null;
     }
 }
