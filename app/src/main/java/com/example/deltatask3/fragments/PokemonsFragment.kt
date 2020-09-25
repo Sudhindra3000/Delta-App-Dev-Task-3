@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,16 +25,15 @@ import com.example.deltatask3.adapters.PokemonAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.database.Favourite
 import com.example.deltatask3.databinding.FragmentPokemonsBinding
+import com.example.deltatask3.showSnackbar
 import com.example.deltatask3.utils.Pokemon
-import com.example.deltatask3.utils.SearchResult
 import com.example.deltatask3.viewmodels.FavouriteViewModel
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.muddzdev.styleabletoast.StyleableToast
 import dagger.hilt.android.AndroidEntryPoint
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 
@@ -73,7 +73,7 @@ class PokemonsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         favouriteViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)).get(FavouriteViewModel::class.java)
         buildRecyclerView()
-        morePokemon
+        getMorePokemon()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -152,50 +152,29 @@ class PokemonsFragment : Fragment() {
 
     private fun paginate() {
         offset += 20
-        morePokemon
+        getMorePokemon()
     }
 
-    private val morePokemon: Unit
-        get() {
-            val pokemonSearchResultCall = pokemonApi!!.getPokemon(offset, 20)
-            pokemonSearchResultCall.enqueue(object : Callback<SearchResult> {
-                override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
-                    if (!response.isSuccessful) {
-                        Log.i(TAG, "onResponse: $response")
-                        return
-                    }
-                    for (result in response.body()!!.results) {
-                        names.add(result.name)
-                        allPokemons.add(Pokemon(result.name))
-                    }
-                    loading = true
-                    loadDetailsIntoPokemons(names)
+    private fun getMorePokemon() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = pokemonApi!!.getPokemon(offset, 20)
+            if (!response.isSuccessful)
+                withContext(Dispatchers.Main) {
+                    showSnackbar(requireView(), "Failed to Fetch Pokemon", Snackbar.LENGTH_SHORT)
                 }
-
-                override fun onFailure(call: Call<SearchResult>, t: Throwable) {
-                    Log.i(TAG, "showAllPokemon failed")
+            else {
+                val results = response.body()!!.results
+                val deferredList = ArrayList<Deferred<Pokemon>>()
+                for (result in results)
+                    deferredList.add(async { pokemonApi!!.getPokemon(result.name).body()!! })
+                allPokemons.addAll(deferredList.awaitAll())
+                loading = true
+                withContext(Dispatchers.Main) {
+                    binding.allPokemonList.setHasFixedSize(false)
+                    pokemonAdapter!!.notifyItemRangeInserted(allPokemons.size - results.size, results.size)
+                    binding.allPokemonList.setHasFixedSize(true)
                 }
-            })
-        }
-
-    private fun loadDetailsIntoPokemons(names: ArrayList<String>) {
-        for (s in names) {
-            val call = pokemonApi!!.getPokemon(s)
-            call.enqueue(object : Callback<Pokemon?> {
-                override fun onResponse(call: Call<Pokemon?>, response: Response<Pokemon?>) {
-                    if (!response.isSuccessful) {
-                        Log.i(TAG, "onResponse: $response")
-                        return
-                    }
-                    if (names.indexOf(s) >= 0) allPokemons[names.indexOf(s)] = response.body()
-                    if (searching) searchPokemonByName(searchView!!.query.toString().trim { it <= ' ' }.toLowerCase(Locale.ROOT))
-                    pokemonAdapter!!.notifyDataSetChanged()
-                }
-
-                override fun onFailure(call: Call<Pokemon?>, t: Throwable) {
-                    Log.i(TAG, "showAllPokemon failed")
-                }
-            })
+            }
         }
     }
 

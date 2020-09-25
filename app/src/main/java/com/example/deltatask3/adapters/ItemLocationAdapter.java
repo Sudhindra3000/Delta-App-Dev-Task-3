@@ -63,8 +63,4 @@ public class ItemLocationAdapter extends RecyclerView.Adapter<ItemLocationAdapte
     private String firstLetterToUppercase(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
-
-    public ItemLocation getItemLocationAt(int pos) {
-        return itemLocations.get(pos);
-    }
 }

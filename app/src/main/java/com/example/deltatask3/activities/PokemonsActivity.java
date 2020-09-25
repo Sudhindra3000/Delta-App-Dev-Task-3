@@ -65,7 +65,6 @@ public class PokemonsActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private PokemonAdapter pokemonAdapter;
     private ArrayList<Pokemon> pokemons = new ArrayList<>(), searchedPokemon = new ArrayList<>();
-    private SearchView searchView;
     private boolean loading = true, searching = false, paginate = true;
 
     private int regionID;
@@ -338,27 +337,29 @@ public class PokemonsActivity extends AppCompatActivity {
         Log.i(TAG, "from:" + offset + ", to:" + toIndex);
         for (String s : names.subList(offset, toIndex)) {
             pokemons.add(new Pokemon(s));
-            Call<Pokemon> call = pokemonApi.getPokemon(s);
-            call.enqueue(new Callback<Pokemon>() {
-                @Override
-                public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
-                    if (!response.isSuccessful()) {
-                        Log.i(TAG, "onResponse: " + response);
-                        return;
-                    }
+            //Todo: Complete this using Coroutines
 
-                    if (names.indexOf(s) >= 0)
-                        pokemons.set(names.indexOf(s), response.body());
-                    if (searching)
-                        searchPokemonByName(searchView.getQuery().toString().trim().toLowerCase());
-                    pokemonAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onFailure(Call<Pokemon> call, Throwable t) {
-                    Log.i(TAG, "t=" + t.getLocalizedMessage());
-                }
-            });
+//            Call<Pokemon> call = pokemonApi.getPokemon(s);
+//            call.enqueue(new Callback<Pokemon>() {
+//                @Override
+//                public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
+//                    if (!response.isSuccessful()) {
+//                        Log.i(TAG, "onResponse: " + response);
+//                        return;
+//                    }
+//
+//                    if (names.indexOf(s) >= 0)
+//                        pokemons.set(names.indexOf(s), response.body());
+//                    if (searching)
+//                        searchPokemonByName(searchView.getQuery().toString().trim().toLowerCase());
+//                    pokemonAdapter.notifyDataSetChanged();
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Pokemon> call, Throwable t) {
+//                    Log.i(TAG, "t=" + t.getLocalizedMessage());
+//                }
+//            });
         }
     }
 
@@ -399,7 +400,7 @@ public class PokemonsActivity extends AppCompatActivity {
         inflater.inflate(R.menu.search_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        searchView = (androidx.appcompat.widget.SearchView) searchItem.getActionView();
+        SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint("Search Pokémon");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

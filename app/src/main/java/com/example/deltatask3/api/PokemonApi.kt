@@ -1,64 +1,55 @@
-package com.example.deltatask3.api;
+package com.example.deltatask3.api
 
-import com.example.deltatask3.utils.EvolutionChain;
-import com.example.deltatask3.utils.ItemLocation;
-import com.example.deltatask3.utils.Pokedex;
-import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.utils.PokemonId;
-import com.example.deltatask3.utils.PokemonSpecies;
-import com.example.deltatask3.utils.Region;
-import com.example.deltatask3.utils.SearchResult;
-import com.example.deltatask3.utils.Type;
+import com.example.deltatask3.utils.*
+import retrofit2.Call
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
 
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
-
-public interface PokemonApi {
-
+interface PokemonApi {
     @GET("pokemon")
-    Call<SearchResult> getPokemon(@Query("offset") int offset, @Query("limit") int limit);
+    suspend fun getPokemon(@Query("offset") offset: Int, @Query("limit") limit: Int): Response<SearchResult>
 
     @GET("pokemon/{name}/")
-    Call<Pokemon> getPokemon(@Path("name") String name);
+    suspend fun getPokemon(@Path("name") name: String): Response<Pokemon>
 
     @GET("pokemon/{id}/")
-    Call<Pokemon> getPokemon(@Path("id") int id);
+    fun getPokemon(@Path("id") id: Int): Call<Pokemon>
 
     @GET("pokemon-species/{id}/")
-    Call<PokemonSpecies> getSpecies(@Path("id") int id);
+    fun getSpecies(@Path("id") id: Int): Call<PokemonSpecies>
 
     @GET("evolution-chain/{id}")
-    Call<EvolutionChain> getEvolutionChain(@Path("id") String idPlusSlash);
+    fun getEvolutionChain(@Path("id") idPlusSlash: String): Call<EvolutionChain>
 
     @GET("pokemon/{name}/")
-    Call<PokemonId> getPokemonId(@Path("name") String name);
+    fun getPokemonId(@Path("name") name: String): Call<PokemonId>
 
     @GET("region/{id}/")
-    Call<Region> getRegion(@Path("id") int id);
+    fun getRegion(@Path("id") id: Int): Call<Region>
 
     @GET("pokedex/{name}/")
-    Call<Pokedex> getPokedex(@Path("name") String name);
+    fun getPokedex(@Path("name") name: String): Call<Pokedex>
 
     @GET("type/{id}/")
-    Call<Type> getType(@Path("id") int id);
+    fun getType(@Path("id") id: Int): Call<Type>
 
     @GET("item")
-    Call<SearchResult> getItems(@Query("offset") int offset, @Query("limit") int limit);
+    fun getItems(@Query("offset") offset: Int, @Query("limit") limit: Int): Call<SearchResult>
 
     @GET("item/{name}/")
-    Call<ItemLocation> getItem(@Path("name") String name);
+    fun getItem(@Path("name") name: String): Call<ItemLocation>
 
     @GET("item/{id}/")
-    Call<ItemLocation> getItem(@Path("id") int id);
+    fun getItem(@Path("id") id: Int): Call<ItemLocation>
 
     @GET("location")
-    Call<SearchResult> getLocations(@Query("offset") int offset, @Query("limit") int limit);
+    fun getLocations(@Query("offset") offset: Int, @Query("limit") limit: Int): Call<SearchResult>
 
     @GET("location/{name}/")
-    Call<ItemLocation> getLocation(@Path("name") String name);
+    fun getLocation(@Path("name") name: String): Call<ItemLocation>
 
     @GET("location/{id}/")
-    Call<ItemLocation> getLocation(@Path("id") int id);
+    fun getLocation(@Path("id") id: Int): Call<ItemLocation>
 }
