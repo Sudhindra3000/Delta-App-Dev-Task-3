@@ -157,7 +157,7 @@ class PokemonsFragment : Fragment() {
 
     private val morePokemon: Unit
         get() {
-            val pokemonSearchResultCall = pokemonApi!!.getPokemonWithOffsetAndLimit(offset, 20)
+            val pokemonSearchResultCall = pokemonApi!!.getPokemon(offset, 20)
             pokemonSearchResultCall.enqueue(object : Callback<SearchResult> {
                 override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
                     if (!response.isSuccessful) {
@@ -180,7 +180,7 @@ class PokemonsFragment : Fragment() {
 
     private fun loadDetailsIntoPokemons(names: ArrayList<String>) {
         for (s in names) {
-            val call = pokemonApi!!.getPokemonFromName(s)
+            val call = pokemonApi!!.getPokemon(s)
             call.enqueue(object : Callback<Pokemon?> {
                 override fun onResponse(call: Call<Pokemon?>, response: Response<Pokemon?>) {
                     if (!response.isSuccessful) {

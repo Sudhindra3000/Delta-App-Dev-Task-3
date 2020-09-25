@@ -85,7 +85,7 @@ class ItemsFragment : Fragment() {
     }
 
     private fun getItems() {
-        val call = pokemonApi!!.getItemsWithOffsetAndLimit(offset, 20)
+        val call = pokemonApi!!.getItems(offset, 20)
         call.enqueue(object : Callback<SearchResult> {
             override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
                 if (!response.isSuccessful) {
@@ -108,7 +108,7 @@ class ItemsFragment : Fragment() {
 
     private fun loadItems(names: ArrayList<String>) {
         for (s in names) {
-            val call = pokemonApi!!.getItemFromName(s)
+            val call = pokemonApi!!.getItem(s)
             call.enqueue(object : Callback<ItemLocation?> {
                 override fun onResponse(call: Call<ItemLocation?>, response: Response<ItemLocation?>) {
                     if (!response.isSuccessful) {

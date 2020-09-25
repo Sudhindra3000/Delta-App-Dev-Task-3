@@ -142,9 +142,9 @@ class SearchFragment : Fragment() {
     }
 
     private fun search(id: Int) {
-        val pokemonCall = pokemonApi!!.getPokemonFromID(id)
-        val itemCall = pokemonApi!!.getItemFromID(id)
-        val locationCall = pokemonApi!!.getLocationFromID(id)
+        val pokemonCall = pokemonApi!!.getPokemon(id)
+        val itemCall = pokemonApi!!.getItem(id)
+        val locationCall = pokemonApi!!.getLocation(id)
         pokemonCall.enqueue(object : Callback<Pokemon?> {
             override fun onResponse(call: Call<Pokemon?>, response: Response<Pokemon?>) {
                 if (!response.isSuccessful) {

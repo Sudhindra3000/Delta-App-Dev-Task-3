@@ -1,6 +1,6 @@
 package com.example.deltatask3.utils;
 
-public class PokemonID {
+public class PokemonId {
 
     private int id;
 

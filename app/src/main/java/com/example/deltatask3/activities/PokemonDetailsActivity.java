@@ -13,7 +13,7 @@ import com.example.deltatask3.api.PokemonApi;
 import com.example.deltatask3.databinding.ActivityPokemonDetailsBinding;
 import com.example.deltatask3.utils.EvolutionChain;
 import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.utils.PokemonID;
+import com.example.deltatask3.utils.PokemonId;
 import com.example.deltatask3.utils.PokemonSpecies;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
@@ -90,7 +90,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
     }
 
     private void getSpecies() {
-        Call<PokemonSpecies> call = pokemonApi.getSpeciesFromID(id);
+        Call<PokemonSpecies> call = pokemonApi.getSpecies(id);
         call.enqueue(new Callback<PokemonSpecies>() {
             @Override
             public void onResponse(Call<PokemonSpecies> call, Response<PokemonSpecies> response) {
@@ -111,7 +111,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
     }
 
     private void getEvolutionChain() {
-        Call<EvolutionChain> call = pokemonApi.getEvolutionChainFromID(evolutionChainURL.substring(42));
+        Call<EvolutionChain> call = pokemonApi.getEvolutionChain(evolutionChainURL.substring(42));
 
         call.enqueue(new Callback<EvolutionChain>() {
             @Override
@@ -160,10 +160,10 @@ public class PokemonDetailsActivity extends AppCompatActivity {
 
     private void loadEvolutionChain() {
         for (String string : names) {
-            Call<PokemonID> call = pokemonApi.getPokemonIDFromName(string);
-            call.enqueue(new Callback<PokemonID>() {
+            Call<PokemonId> call = pokemonApi.getPokemonId(string);
+            call.enqueue(new Callback<PokemonId>() {
                 @Override
-                public void onResponse(Call<PokemonID> call, Response<PokemonID> response) {
+                public void onResponse(Call<PokemonId> call, Response<PokemonId> response) {
                     if (!response.isSuccessful()) {
                         Log.i(TAG, "onResponse: " + response);
                         return;
@@ -174,7 +174,7 @@ public class PokemonDetailsActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<PokemonID> call, Throwable t) {
+                public void onFailure(Call<PokemonId> call, Throwable t) {
                     Log.i(TAG, "t=" + t.getLocalizedMessage());
                 }
             });

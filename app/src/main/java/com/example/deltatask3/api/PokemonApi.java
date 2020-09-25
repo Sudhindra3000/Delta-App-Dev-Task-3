@@ -4,7 +4,7 @@ import com.example.deltatask3.utils.EvolutionChain;
 import com.example.deltatask3.utils.ItemLocation;
 import com.example.deltatask3.utils.Pokedex;
 import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.utils.PokemonID;
+import com.example.deltatask3.utils.PokemonId;
 import com.example.deltatask3.utils.PokemonSpecies;
 import com.example.deltatask3.utils.Region;
 import com.example.deltatask3.utils.SearchResult;
@@ -17,48 +17,48 @@ import retrofit2.http.Query;
 
 public interface PokemonApi {
 
-    @GET("https://pokeapi.co/api/v2/pokemon/")
-    Call<SearchResult> getPokemonWithOffsetAndLimit(@Query("offset") int offset, @Query("limit") int limit);
+    @GET("pokemon")
+    Call<SearchResult> getPokemon(@Query("offset") int offset, @Query("limit") int limit);
 
-    @GET("https://pokeapi.co/api/v2/pokemon/{name}/")
-    Call<Pokemon> getPokemonFromName(@Path("name") String name);
+    @GET("pokemon/{name}/")
+    Call<Pokemon> getPokemon(@Path("name") String name);
 
-    @GET("https://pokeapi.co/api/v2/pokemon-species/{id}/")
-    Call<PokemonSpecies> getSpeciesFromID(@Path("id") int id);
+    @GET("pokemon/{id}/")
+    Call<Pokemon> getPokemon(@Path("id") int id);
 
-    @GET("https://pokeapi.co/api/v2/evolution-chain/{id}")
-    Call<EvolutionChain> getEvolutionChainFromID(@Path("id") String idPlusSlash);
+    @GET("pokemon-species/{id}/")
+    Call<PokemonSpecies> getSpecies(@Path("id") int id);
 
-    @GET("https://pokeapi.co/api/v2/pokemon/{name}/")
-    Call<PokemonID> getPokemonIDFromName(@Path("name") String name);
+    @GET("evolution-chain/{id}")
+    Call<EvolutionChain> getEvolutionChain(@Path("id") String idPlusSlash);
 
-    @GET("https://pokeapi.co/api/v2/region/{id}/")
-    Call<Region> getRegionFromID(@Path("id") int id);
+    @GET("pokemon/{name}/")
+    Call<PokemonId> getPokemonId(@Path("name") String name);
 
-    @GET("https://pokeapi.co/api/v2/pokedex/{name}/")
-    Call<Pokedex> getPokedexFromName(@Path("name") String name);
+    @GET("region/{id}/")
+    Call<Region> getRegion(@Path("id") int id);
 
-    @GET("https://pokeapi.co/api/v2/type/{id}/")
-    Call<Type> getTypeFromID(@Path("id") int id);
+    @GET("pokedex/{name}/")
+    Call<Pokedex> getPokedex(@Path("name") String name);
 
-    @GET("https://pokeapi.co/api/v2/item/")
-    Call<SearchResult> getItemsWithOffsetAndLimit(@Query("offset") int offset, @Query("limit") int limit);
+    @GET("type/{id}/")
+    Call<Type> getType(@Path("id") int id);
 
-    @GET("https://pokeapi.co/api/v2/item/{name}/")
-    Call<ItemLocation> getItemFromName(@Path("name") String name);
+    @GET("item")
+    Call<SearchResult> getItems(@Query("offset") int offset, @Query("limit") int limit);
 
-    @GET("https://pokeapi.co/api/v2/location/")
-    Call<SearchResult> getLocationsWithOffsetAndLimit(@Query("offset") int offset, @Query("limit") int limit);
+    @GET("item/{name}/")
+    Call<ItemLocation> getItem(@Path("name") String name);
 
-    @GET("https://pokeapi.co/api/v2/location/{name}/")
-    Call<ItemLocation> getLocationFromName(@Path("name") String name);
+    @GET("item/{id}/")
+    Call<ItemLocation> getItem(@Path("id") int id);
 
-    @GET("https://pokeapi.co/api/v2/pokemon/{id}/")
-    Call<Pokemon> getPokemonFromID(@Path("id") int id);
+    @GET("location")
+    Call<SearchResult> getLocations(@Query("offset") int offset, @Query("limit") int limit);
 
-    @GET("https://pokeapi.co/api/v2/item/{id}/")
-    Call<ItemLocation> getItemFromID(@Path("id") int id);
+    @GET("location/{name}/")
+    Call<ItemLocation> getLocation(@Path("name") String name);
 
-    @GET("https://pokeapi.co/api/v2/location/{id}/")
-    Call<ItemLocation> getLocationFromID(@Path("id") int id);
+    @GET("location/{id}/")
+    Call<ItemLocation> getLocation(@Path("id") int id);
 }

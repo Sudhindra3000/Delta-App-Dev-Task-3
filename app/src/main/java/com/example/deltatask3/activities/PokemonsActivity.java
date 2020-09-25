@@ -199,7 +199,7 @@ public class PokemonsActivity extends AppCompatActivity {
     }
 
     private void getRegion() {
-        Call<Region> call = pokemonApi.getRegionFromID(regionID);
+        Call<Region> call = pokemonApi.getRegion(regionID);
         call.enqueue(new Callback<Region>() {
             @Override
             public void onResponse(Call<Region> call, Response<Region> response) {
@@ -235,7 +235,7 @@ public class PokemonsActivity extends AppCompatActivity {
         if (regionID == 6) {
             ArrayList<String> names2 = new ArrayList<>(), names3 = new ArrayList<>();
             for (Pokedex pokedex1 : pokedexes) {
-                Call<Pokedex> call = pokemonApi.getPokedexFromName(pokedex1.getName());
+                Call<Pokedex> call = pokemonApi.getPokedex(pokedex1.getName());
                 call.enqueue(new Callback<Pokedex>() {
                     @Override
                     public void onResponse(Call<Pokedex> call, Response<Pokedex> response) {
@@ -278,7 +278,7 @@ public class PokemonsActivity extends AppCompatActivity {
             }
 
         } else {
-            Call<Pokedex> call = pokemonApi.getPokedexFromName(pokedex.getName());
+            Call<Pokedex> call = pokemonApi.getPokedex(pokedex.getName());
             call.enqueue(new Callback<Pokedex>() {
                 @Override
                 public void onResponse(Call<Pokedex> call, Response<Pokedex> response) {
@@ -304,7 +304,7 @@ public class PokemonsActivity extends AppCompatActivity {
     }
 
     private void getType() {
-        Call<Type> call = pokemonApi.getTypeFromID(typeID);
+        Call<Type> call = pokemonApi.getType(typeID);
         call.enqueue(new Callback<Type>() {
             @Override
             public void onResponse(Call<Type> call, Response<Type> response) {
@@ -338,7 +338,7 @@ public class PokemonsActivity extends AppCompatActivity {
         Log.i(TAG, "from:" + offset + ", to:" + toIndex);
         for (String s : names.subList(offset, toIndex)) {
             pokemons.add(new Pokemon(s));
-            Call<Pokemon> call = pokemonApi.getPokemonFromName(s);
+            Call<Pokemon> call = pokemonApi.getPokemon(s);
             call.enqueue(new Callback<Pokemon>() {
                 @Override
                 public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
