@@ -47,12 +47,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         binding.drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
 
+        initFragments();
+
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, new PokemonsFragment()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.frContainer, fragments.get(0)).commit();
             binding.navView.setCheckedItem(R.id.po);
         }
-
-        initFragments();
     }
 
     private void initFragments() {
