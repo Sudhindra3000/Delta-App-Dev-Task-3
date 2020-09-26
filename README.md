@@ -24,6 +24,8 @@ A Pokédex App which displays details of Various Pokémon, Items and Locations f
 ## Resources Used
 
 * [Material Design Components for Android](https://material.io/develop/android/docs/getting-started/)
+* [Dagger Hilt](https://dagger.dev/hilt/)
+* [Kotlin Coroutines](https://kotlinlang.org/docs/reference/coroutines-overview.html)
 * [Retrofit](https://square.github.io/retrofit/)
 * [Gson](https://github.com/google/gson)
 * [Picasso](https://github.com/square/picasso)
