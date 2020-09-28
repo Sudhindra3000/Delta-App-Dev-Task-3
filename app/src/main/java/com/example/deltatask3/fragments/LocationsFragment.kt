@@ -6,20 +6,21 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltatask3.R
 import com.example.deltatask3.adapters.ItemLocationAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.databinding.FragmentLocationsBinding
+import com.example.deltatask3.showSnackbar
 import com.example.deltatask3.utils.ItemLocation
-import com.example.deltatask3.utils.SearchResult
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class LocationsFragment : Fragment() {
@@ -28,12 +29,12 @@ class LocationsFragment : Fragment() {
         private const val TAG = "LocationsFragment"
     }
 
-    private var binding: FragmentLocationsBinding? = null
+    private var _binding: FragmentLocationsBinding? = null
+    private val binding get() = _binding!!
 
     @JvmField
     @Inject
     var pokemonApi: PokemonApi? = null
-    private val names = ArrayList<String>()
     private val locations = ArrayList<ItemLocation?>()
     private val searchedLocations = ArrayList<ItemLocation?>()
     private var adapter: ItemLocationAdapter? = null
@@ -42,9 +43,9 @@ class LocationsFragment : Fragment() {
     private var loading = true
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        binding = FragmentLocationsBinding.inflate(inflater, container, false)
+        _binding = FragmentLocationsBinding.inflate(inflater, container, false)
         setHasOptionsMenu(true)
-        return binding!!.root
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -54,11 +55,11 @@ class LocationsFragment : Fragment() {
     }
 
     private fun buildRecyclerView() {
-        binding!!.allLocations.setHasFixedSize(true)
+        binding.allLocations.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(requireContext())
         adapter = ItemLocationAdapter()
         adapter!!.setItemLocations(locations)
-        binding!!.allLocations.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.allLocations.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
                     val visibleItemCount = layoutManager!!.childCount
@@ -74,8 +75,8 @@ class LocationsFragment : Fragment() {
                 }
             }
         })
-        binding!!.allLocations.layoutManager = layoutManager
-        binding!!.allLocations.adapter = adapter
+        binding.allLocations.layoutManager = layoutManager
+        binding.allLocations.adapter = adapter
     }
 
     private fun paginate() {
@@ -84,44 +85,29 @@ class LocationsFragment : Fragment() {
     }
 
     private fun getLocations() {
-        val call = pokemonApi!!.getLocations(offset, 20)
-        call.enqueue(object : Callback<SearchResult> {
-            override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
-                if (!response.isSuccessful) {
-                    Log.i(TAG, "onResponse: $response")
-                    return
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = pokemonApi!!.getLocations(offset, 20)
+            if (!response.isSuccessful)
+                withContext(Dispatchers.Main) {
+                    showSnackbar(requireView(), "Failed to Fetch Locations", Snackbar.LENGTH_SHORT)
                 }
-                for (result in response.body()!!.results) {
-                    names.add(result.name)
-                    locations.add(ItemLocation(result.name))
-                }
+            else {
+                val results = response.body()!!.results
+                val deferredList = ArrayList<Deferred<ItemLocation>>()
+                for (result in results)
+                    deferredList.add(
+                            async {
+                                pokemonApi!!.getLocation(result.name).body()!!
+                            }
+                    )
+                locations.addAll(deferredList.awaitAll())
                 loading = true
-                loadLocations(names)
-            }
-
-            override fun onFailure(call: Call<SearchResult>, t: Throwable) {
-                Log.i(TAG, "t=" + t.localizedMessage)
-            }
-        })
-    }
-
-    private fun loadLocations(names: ArrayList<String>) {
-        for (s in names) {
-            val call = pokemonApi!!.getLocation(s)
-            call.enqueue(object : Callback<ItemLocation?> {
-                override fun onResponse(call: Call<ItemLocation?>, response: Response<ItemLocation?>) {
-                    if (!response.isSuccessful) {
-                        Log.i(TAG, "onResponse: $response")
-                        return
-                    }
-                    if (names.indexOf(s) >= 0) locations[names.indexOf(s)] = response.body()
-                    adapter!!.notifyDataSetChanged()
+                withContext(Dispatchers.Main) {
+                    binding.allLocations.setHasFixedSize(false)
+                    adapter!!.notifyItemRangeInserted(locations.size - results.size, results.size)
+                    binding.allLocations.setHasFixedSize(true)
                 }
-
-                override fun onFailure(call: Call<ItemLocation?>, t: Throwable) {
-                    Log.i(TAG, "t=" + t.localizedMessage)
-                }
-            })
+            }
         }
     }
 
@@ -162,6 +148,6 @@ class LocationsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding = null
+        _binding = null
     }
 }

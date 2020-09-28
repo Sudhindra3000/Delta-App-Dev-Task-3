@@ -73,7 +73,7 @@ class PokemonsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         favouriteViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)).get(FavouriteViewModel::class.java)
         buildRecyclerView()
-        getMorePokemon()
+        getPokemon()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -152,10 +152,10 @@ class PokemonsFragment : Fragment() {
 
     private fun paginate() {
         offset += 20
-        getMorePokemon()
+        getPokemon()
     }
 
-    private fun getMorePokemon() {
+    private fun getPokemon() {
         lifecycleScope.launch(Dispatchers.IO) {
             val response = pokemonApi!!.getPokemon(offset, 20)
             if (!response.isSuccessful)
@@ -166,7 +166,11 @@ class PokemonsFragment : Fragment() {
                 val results = response.body()!!.results
                 val deferredList = ArrayList<Deferred<Pokemon>>()
                 for (result in results)
-                    deferredList.add(async { pokemonApi!!.getPokemon(result.name).body()!! })
+                    deferredList.add(
+                            async {
+                                pokemonApi!!.getPokemon(result.name).body()!!
+                            }
+                    )
                 allPokemons.addAll(deferredList.awaitAll())
                 loading = true
                 withContext(Dispatchers.Main) {

@@ -45,10 +45,10 @@ interface PokemonApi {
     fun getItem(@Path("id") id: Int): Call<ItemLocation>
 
     @GET("location")
-    fun getLocations(@Query("offset") offset: Int, @Query("limit") limit: Int): Call<SearchResult>
+    suspend fun getLocations(@Query("offset") offset: Int, @Query("limit") limit: Int): Response<SearchResult>
 
     @GET("location/{name}/")
-    fun getLocation(@Path("name") name: String): Call<ItemLocation>
+    suspend fun getLocation(@Path("name") name: String): Response<ItemLocation>
 
     @GET("location/{id}/")
     fun getLocation(@Path("id") id: Int): Call<ItemLocation>
