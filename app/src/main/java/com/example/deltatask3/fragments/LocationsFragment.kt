@@ -113,10 +113,10 @@ class LocationsFragment : Fragment() {
 
     private fun searchLocationsByName(name: String) {
         var name = name
-        name = name.trim { it <= ' ' }.toLowerCase(Locale.ROOT)
+        name = name.trim().toLowerCase(Locale.ROOT)
         searchedLocations.clear()
         for (item in locations) {
-            if (item!!.name.trim { it <= ' ' }.contains(name)) searchedLocations.add(item)
+            if (item!!.name.trim().contains(name)) searchedLocations.add(item)
         }
         adapter!!.setItemLocations(searchedLocations)
         adapter!!.notifyDataSetChanged()
@@ -135,11 +135,11 @@ class LocationsFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.length == 0) {
+                if (newText.isEmpty()) {
                     searchedLocations.clear()
                     adapter!!.setItemLocations(locations)
                     adapter!!.notifyDataSetChanged()
-                } else searchLocationsByName(newText.toLowerCase(Locale.ROOT).trim { it <= ' ' })
+                } else searchLocationsByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true
             }
         })

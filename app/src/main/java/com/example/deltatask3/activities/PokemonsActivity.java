@@ -48,6 +48,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
+
 @AndroidEntryPoint
 public class PokemonsActivity extends AppCompatActivity {
 
@@ -388,10 +390,6 @@ public class PokemonsActivity extends AppCompatActivity {
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(PokemonsActivity.this, imagePair, namePair);
             startActivity(intent, options.toBundle());
         }
-    }
-
-    private String firstLetterToUppercase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
     @Override

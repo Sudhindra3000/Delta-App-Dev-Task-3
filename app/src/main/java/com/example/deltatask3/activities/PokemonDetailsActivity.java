@@ -27,6 +27,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
+
 @AndroidEntryPoint
 public class PokemonDetailsActivity extends AppCompatActivity {
 
@@ -220,9 +222,5 @@ public class PokemonDetailsActivity extends AppCompatActivity {
 
     private String getSpriteURLFromID(int id) {
         return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + id + ".png";
-    }
-
-    private String firstLetterToUppercase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 }

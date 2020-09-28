@@ -116,7 +116,7 @@ class ItemsFragment : Fragment() {
         name = name.trim { it <= ' ' }.toLowerCase(Locale.ROOT)
         searchedItems.clear()
         for (item in items) {
-            if (item!!.name.trim { it <= ' ' }.contains(name)) searchedItems.add(item)
+            if (item!!.name.trim().contains(name)) searchedItems.add(item)
         }
         adapter!!.setItemLocations(searchedItems)
         adapter!!.notifyDataSetChanged()
@@ -135,11 +135,11 @@ class ItemsFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.length == 0) {
+                if (newText.isEmpty()) {
                     searchedItems.clear()
                     adapter!!.setItemLocations(items)
                     adapter!!.notifyDataSetChanged()
-                } else searchItemsByName(newText.toLowerCase(Locale.ROOT).trim { it <= ' ' })
+                } else searchItemsByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true
             }
         })

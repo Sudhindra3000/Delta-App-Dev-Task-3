@@ -15,6 +15,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
+
 public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder> {
 
     private ArrayList<Pokemon> pokemons;
@@ -67,10 +69,6 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonV
     @Override
     public int getItemCount() {
         return pokemons.size();
-    }
-
-    private String firstLetterToUppercase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
     public Pokemon getPokemonAt(int pos) {

@@ -25,6 +25,7 @@ import com.example.deltatask3.adapters.PokemonAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.database.Favourite
 import com.example.deltatask3.databinding.FragmentPokemonsBinding
+import com.example.deltatask3.firstLetterToUppercase
 import com.example.deltatask3.showSnackbar
 import com.example.deltatask3.utils.Pokemon
 import com.example.deltatask3.viewmodels.FavouriteViewModel
@@ -184,9 +185,8 @@ class PokemonsFragment : Fragment() {
 
     private fun searchPokemonByName(name: String) {
         searchedPokemon.clear()
-        for (pokemon in allPokemons) {
-            if (pokemon!!.name.trim { it <= ' ' }.contains(name)) searchedPokemon.add(pokemon)
-        }
+        for (pokemon in allPokemons)
+            if (pokemon!!.name.trim().contains(name)) searchedPokemon.add(pokemon)
         pokemonAdapter!!.setPokemons(searchedPokemon)
         pokemonAdapter!!.notifyDataSetChanged()
     }
@@ -205,10 +205,6 @@ class PokemonsFragment : Fragment() {
         }
     }
 
-    private fun firstLetterToUppercase(string: String): String {
-        return string.substring(0, 1).toUpperCase(Locale.ROOT) + string.substring(1)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
         inflater.inflate(R.menu.search_menu, menu)
@@ -224,7 +220,7 @@ class PokemonsFragment : Fragment() {
                     searchedPokemon.clear()
                     pokemonAdapter!!.setPokemons(allPokemons)
                     pokemonAdapter!!.notifyDataSetChanged()
-                } else searchPokemonByName(query.toLowerCase(Locale.ROOT).trim { it <= ' ' })
+                } else searchPokemonByName(query.toLowerCase(Locale.ROOT).trim())
                 return false
             }
 
@@ -234,7 +230,7 @@ class PokemonsFragment : Fragment() {
                     searchedPokemon.clear()
                     pokemonAdapter!!.setPokemons(allPokemons)
                     pokemonAdapter!!.notifyDataSetChanged()
-                } else searchPokemonByName(newText.toLowerCase(Locale.ROOT).trim { it <= ' ' })
+                } else searchPokemonByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true
             }
         })

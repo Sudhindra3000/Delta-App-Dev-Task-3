@@ -16,6 +16,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
+
 public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.FavouriteViewHolder> {
 
     private List<Favourite> favourites;
@@ -72,10 +74,6 @@ public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.Favo
     public int getItemCount() {
         if (favourites == null) return 0;
         return favourites.size();
-    }
-
-    private String firstLetterToUppercase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
     public Favourite getFavouriteAt(int pos) {

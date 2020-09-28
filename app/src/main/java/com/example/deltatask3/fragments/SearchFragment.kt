@@ -26,6 +26,7 @@ import com.example.deltatask3.adapters.PokemonAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.database.Favourite
 import com.example.deltatask3.databinding.FragmentSearchBinding
+import com.example.deltatask3.firstLetterToUppercase
 import com.example.deltatask3.utils.ItemLocation
 import com.example.deltatask3.utils.Pokemon
 import com.example.deltatask3.viewmodels.FavouriteViewModel
@@ -78,7 +79,7 @@ class SearchFragment : Fragment() {
         val pokemonLayoutManager = LinearLayoutManager(requireContext())
         pokemonAdapter = PokemonAdapter()
         pokemonAdapter!!.setPokemons(pokemons)
-        pokemonAdapter!!.setListener { position: Int, pokemon: ImageView, name: TextView -> showDetails(pokemon, name) }
+        pokemonAdapter!!.setListener { _: Int, pokemon: ImageView, name: TextView -> showDetails(pokemon, name) }
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 return false
@@ -201,10 +202,6 @@ class SearchFragment : Fragment() {
         })
     }
 
-    private fun firstLetterToUppercase(string: String): String {
-        return string.substring(0, 1).toUpperCase(Locale.ROOT) + string.substring(1)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
         inflater.inflate(R.menu.search_menu, menu)
@@ -219,13 +216,13 @@ class SearchFragment : Fragment() {
         }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                if (query.isNotEmpty()) search(query.trim { it <= ' ' }.toInt()) else search(0)
+                if (query.isNotEmpty()) search(query.trim().toInt()) else search(0)
                 binding.tvS.visibility = View.INVISIBLE
                 return false
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.isNotEmpty()) search(newText.trim { it <= ' ' }.toInt()) else search(0)
+                if (newText.isNotEmpty()) search(newText.trim().toInt()) else search(0)
                 binding.tvS.visibility = View.INVISIBLE
                 return true
             }

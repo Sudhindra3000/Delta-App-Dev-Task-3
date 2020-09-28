@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
+
 public class ItemLocationAdapter extends RecyclerView.Adapter<ItemLocationAdapter.ItemLocationViewHolder> {
 
     private ArrayList<ItemLocation> itemLocations;
@@ -58,9 +60,5 @@ public class ItemLocationAdapter extends RecyclerView.Adapter<ItemLocationAdapte
     @Override
     public int getItemCount() {
         return itemLocations.size();
-    }
-
-    private String firstLetterToUppercase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 }

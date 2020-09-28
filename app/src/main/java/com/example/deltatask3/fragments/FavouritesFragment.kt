@@ -26,6 +26,7 @@ import com.example.deltatask3.adapters.FavouriteAdapter
 import com.example.deltatask3.adapters.FavouriteAdapter.FavouriteListener
 import com.example.deltatask3.database.Favourite
 import com.example.deltatask3.databinding.FragmentFavouritesBinding
+import com.example.deltatask3.firstLetterToUppercase
 import com.example.deltatask3.utils.Pokemon
 import com.example.deltatask3.viewmodels.FavouriteViewModel
 import com.google.gson.Gson
@@ -202,7 +203,7 @@ class FavouritesFragment : Fragment() {
         searchedFavourites.clear()
         var favouriteS: Favourite
         for (favourite in favouriteViewModel!!.allFavourites.value!!) {
-            if (favourite.pokemon.name.trim { it <= ' ' }.contains(name)) {
+            if (favourite.pokemon.name.trim().contains(name)) {
                 favouriteS = Favourite(favourite.pokemon)
                 favouriteS.id = favourite.id
                 searchedFavourites.add(favouriteS)
@@ -230,7 +231,7 @@ class FavouritesFragment : Fragment() {
                     searchedFavourites.clear()
                     adapter!!.setFavourites(favouriteViewModel!!.allFavourites.value)
                     adapter!!.notifyDataSetChanged()
-                } else searchFavouritesByName(query.toLowerCase().trim { it <= ' ' })
+                } else searchFavouritesByName(query.toLowerCase().trim())
                 return false
             }
 
@@ -240,7 +241,7 @@ class FavouritesFragment : Fragment() {
                     searchedFavourites.clear()
                     adapter!!.setFavourites(favouriteViewModel!!.allFavourites.value)
                     adapter!!.notifyDataSetChanged()
-                } else searchFavouritesByName(newText.toLowerCase().trim { it <= ' ' })
+                } else searchFavouritesByName(newText.toLowerCase().trim())
                 return true
             }
         })
@@ -257,9 +258,5 @@ class FavouritesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun firstLetterToUppercase(string: String): String {
-        return string.substring(0, 1).toUpperCase() + string.substring(1)
     }
 }
