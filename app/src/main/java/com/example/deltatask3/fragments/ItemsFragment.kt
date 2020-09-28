@@ -6,20 +6,21 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.deltatask3.R
 import com.example.deltatask3.adapters.ItemLocationAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.databinding.FragmentItemsBinding
+import com.example.deltatask3.showSnackbar
 import com.example.deltatask3.utils.ItemLocation
-import com.example.deltatask3.utils.SearchResult
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class ItemsFragment : Fragment() {
@@ -34,7 +35,6 @@ class ItemsFragment : Fragment() {
     @JvmField
     @Inject
     var pokemonApi: PokemonApi? = null
-    private val names = ArrayList<String>()
     private val items = ArrayList<ItemLocation?>()
     private val searchedItems = ArrayList<ItemLocation?>()
     private var adapter: ItemLocationAdapter? = null
@@ -85,44 +85,29 @@ class ItemsFragment : Fragment() {
     }
 
     private fun getItems() {
-        val call = pokemonApi!!.getItems(offset, 20)
-        call.enqueue(object : Callback<SearchResult> {
-            override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
-                if (!response.isSuccessful) {
-                    Log.i(TAG, "onResponse: $response")
-                    return
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = pokemonApi!!.getItems(offset, 20)
+            if (!response.isSuccessful)
+                withContext(Dispatchers.Main) {
+                    showSnackbar(requireView(), "Failed to Fetch Items", Snackbar.LENGTH_SHORT)
                 }
-                for (result in response.body()!!.results) {
-                    names.add(result.name)
-                    items.add(ItemLocation(result.name))
-                }
+            else {
+                val results = response.body()!!.results
+                val deferredList = ArrayList<Deferred<ItemLocation>>()
+                for (result in results)
+                    deferredList.add(
+                            async {
+                                pokemonApi!!.getItem(result.name).body()!!
+                            }
+                    )
+                items.addAll(deferredList.awaitAll())
                 loading = true
-                loadItems(names)
-            }
-
-            override fun onFailure(call: Call<SearchResult>, t: Throwable) {
-                Log.i(TAG, "t=" + t.localizedMessage)
-            }
-        })
-    }
-
-    private fun loadItems(names: ArrayList<String>) {
-        for (s in names) {
-            val call = pokemonApi!!.getItem(s)
-            call.enqueue(object : Callback<ItemLocation?> {
-                override fun onResponse(call: Call<ItemLocation?>, response: Response<ItemLocation?>) {
-                    if (!response.isSuccessful) {
-                        Log.i(TAG, "onResponse: $response")
-                        return
-                    }
-                    if (names.indexOf(s) >= 0) items[names.indexOf(s)] = response.body()
-                    adapter!!.notifyDataSetChanged()
+                withContext(Dispatchers.Main) {
+                    binding.allItems.setHasFixedSize(false)
+                    adapter!!.notifyItemRangeInserted(items.size - results.size, results.size)
+                    binding.allItems.setHasFixedSize(true)
                 }
-
-                override fun onFailure(call: Call<ItemLocation?>, t: Throwable) {
-                    Log.i(TAG, "t=" + t.localizedMessage)
-                }
-            })
+            }
         }
     }
 
