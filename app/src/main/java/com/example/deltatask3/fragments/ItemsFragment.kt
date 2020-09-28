@@ -95,11 +95,7 @@ class ItemsFragment : Fragment() {
                 val results = response.body()!!.results
                 val deferredList = ArrayList<Deferred<ItemLocation>>()
                 for (result in results)
-                    deferredList.add(
-                            async {
-                                pokemonApi!!.getItem(result.name).body()!!
-                            }
-                    )
+                    deferredList.add(async { pokemonApi!!.getItem(result.name).body()!! })
                 items.addAll(deferredList.awaitAll())
                 loading = true
                 withContext(Dispatchers.Main) {

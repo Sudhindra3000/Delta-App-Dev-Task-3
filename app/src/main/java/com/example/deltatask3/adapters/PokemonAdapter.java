@@ -56,6 +56,7 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.PokemonV
     @Override
     public void onBindViewHolder(@NonNull PokemonViewHolder holder, int position) {
         Pokemon pokemon = pokemons.get(position);
+        if (pokemon == null) return;
 
         if (pokemon.getSprites() != null) {
             String urlSprite = pokemon.getSprites().getFront_default();

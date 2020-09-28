@@ -15,7 +15,7 @@ interface PokemonApi {
     suspend fun getPokemon(@Path("name") name: String): Response<Pokemon>
 
     @GET("pokemon/{id}/")
-    fun getPokemon(@Path("id") id: Int): Call<Pokemon>
+    suspend fun getPokemon(@Path("id") id: Int): Response<Pokemon>
 
     @GET("pokemon-species/{id}/")
     fun getSpecies(@Path("id") id: Int): Call<PokemonSpecies>
@@ -42,7 +42,7 @@ interface PokemonApi {
     suspend fun getItem(@Path("name") name: String): Response<ItemLocation>
 
     @GET("item/{id}/")
-    fun getItem(@Path("id") id: Int): Call<ItemLocation>
+    suspend fun getItem(@Path("id") id: Int): Response<ItemLocation>
 
     @GET("location")
     suspend fun getLocations(@Query("offset") offset: Int, @Query("limit") limit: Int): Response<SearchResult>
@@ -51,5 +51,5 @@ interface PokemonApi {
     suspend fun getLocation(@Path("name") name: String): Response<ItemLocation>
 
     @GET("location/{id}/")
-    fun getLocation(@Path("id") id: Int): Call<ItemLocation>
+    suspend fun getLocation(@Path("id") id: Int): Response<ItemLocation>
 }

@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.util.Pair
 import android.view.*
 import android.view.inputmethod.EditorInfo
@@ -16,6 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,9 +34,7 @@ import com.google.gson.Gson
 import com.muddzdev.styleabletoast.StyleableToast
 import dagger.hilt.android.AndroidEntryPoint
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 
@@ -51,6 +49,8 @@ class SearchFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var favouriteViewModel: FavouriteViewModel? = null
+
+    private var searchJob: Job? = null
 
     @JvmField
     @Inject
@@ -143,63 +143,29 @@ class SearchFragment : Fragment() {
     }
 
     private fun search(id: Int) {
-        val pokemonCall = pokemonApi!!.getPokemon(id)
-        val itemCall = pokemonApi!!.getItem(id)
-        val locationCall = pokemonApi!!.getLocation(id)
-        pokemonCall.enqueue(object : Callback<Pokemon?> {
-            override fun onResponse(call: Call<Pokemon?>, response: Response<Pokemon?>) {
-                if (!response.isSuccessful) {
-                    Log.i(TAG, "onResponse: $response")
-                    binding.pokemonCard.visibility = View.GONE
-                    return
-                }
+        if (searchJob != null && searchJob!!.isActive)
+            searchJob!!.cancel()
+        searchJob = lifecycleScope.launch(Dispatchers.IO) {
+            val pokemonCall = async { pokemonApi!!.getPokemon(id) }
+            val itemCall = async { pokemonApi!!.getItem(id) }
+            val locationCall = async { pokemonApi!!.getLocation(id) }
+            pokemons.clear()
+            items.clear()
+            locations.clear()
+            pokemons.add(pokemonCall.await().body())
+            items.add(itemCall.await().body())
+            locations.add(locationCall.await().body())
+            withContext(Dispatchers.Main) {
+                binding.searchResults.visibility = View.VISIBLE
                 binding.pokemonCard.visibility = View.VISIBLE
-                pokemons.clear()
-                pokemons.add(response.body())
-                pokemonAdapter!!.notifyDataSetChanged()
-            }
-
-            override fun onFailure(call: Call<Pokemon?>, t: Throwable) {
-                Log.i(TAG, "t=" + t.localizedMessage)
-                binding.pokemonCard.visibility = View.GONE
-            }
-        })
-        itemCall.enqueue(object : Callback<ItemLocation?> {
-            override fun onResponse(call: Call<ItemLocation?>, response: Response<ItemLocation?>) {
-                if (!response.isSuccessful) {
-                    Log.i(TAG, "onResponse: $response")
-                    binding.itemCard.visibility = View.GONE
-                    return
-                }
                 binding.itemCard.visibility = View.VISIBLE
-                items.clear()
-                items.add(response.body())
-                itemAdapter!!.notifyDataSetChanged()
-            }
-
-            override fun onFailure(call: Call<ItemLocation?>, t: Throwable) {
-                Log.i(TAG, "t=" + t.localizedMessage)
-                binding.itemCard.visibility = View.GONE
-            }
-        })
-        locationCall.enqueue(object : Callback<ItemLocation?> {
-            override fun onResponse(call: Call<ItemLocation?>, response: Response<ItemLocation?>) {
-                if (!response.isSuccessful) {
-                    Log.i(TAG, "onResponse: $response")
-                    binding.locationCard.visibility = View.GONE
-                    return
-                }
                 binding.locationCard.visibility = View.VISIBLE
-                locations.clear()
-                locations.add(response.body())
+                pokemonAdapter!!.notifyDataSetChanged()
+                itemAdapter!!.notifyDataSetChanged()
                 locationAdapter!!.notifyDataSetChanged()
+                searchJob = null
             }
-
-            override fun onFailure(call: Call<ItemLocation?>, t: Throwable) {
-                Log.i(TAG, "t=" + t.localizedMessage)
-                binding.locationCard.visibility = View.GONE
-            }
-        })
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -216,13 +182,17 @@ class SearchFragment : Fragment() {
         }
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                if (query.isNotEmpty()) search(query.trim().toInt()) else search(0)
+                binding.searchResults.visibility = View.GONE
+                if (query.isNotEmpty())
+                    search(query.trim().toInt())
                 binding.tvS.visibility = View.INVISIBLE
                 return false
             }
 
             override fun onQueryTextChange(newText: String): Boolean {
-                if (newText.isNotEmpty()) search(newText.trim().toInt()) else search(0)
+                binding.searchResults.visibility = View.GONE
+                if (newText.isNotEmpty())
+                    search(newText.trim().toInt())
                 binding.tvS.visibility = View.INVISIBLE
                 return true
             }

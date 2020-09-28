@@ -167,11 +167,7 @@ class PokemonsFragment : Fragment() {
                 val results = response.body()!!.results
                 val deferredList = ArrayList<Deferred<Pokemon>>()
                 for (result in results)
-                    deferredList.add(
-                            async {
-                                pokemonApi!!.getPokemon(result.name).body()!!
-                            }
-                    )
+                    deferredList.add(async { pokemonApi!!.getPokemon(result.name).body()!! })
                 allPokemons.addAll(deferredList.awaitAll())
                 loading = true
                 withContext(Dispatchers.Main) {

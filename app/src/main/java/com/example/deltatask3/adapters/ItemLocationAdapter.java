@@ -45,6 +45,7 @@ public class ItemLocationAdapter extends RecyclerView.Adapter<ItemLocationAdapte
     @Override
     public void onBindViewHolder(@NonNull ItemLocationViewHolder holder, int position) {
         ItemLocation itemLocation = itemLocations.get(position);
+        if (itemLocation == null) return;
 
         if (itemLocation.getSprite() != null) {
             holder.binding.ivPokemon.setVisibility(View.VISIBLE);
