@@ -27,7 +27,7 @@ import com.example.deltatask3.adapters.FavouriteAdapter.FavouriteListener
 import com.example.deltatask3.database.Favourite
 import com.example.deltatask3.databinding.FragmentFavouritesBinding
 import com.example.deltatask3.firstLetterToUppercase
-import com.example.deltatask3.utils.Pokemon
+import com.example.deltatask3.models.Pokemon
 import com.example.deltatask3.viewmodels.FavouriteViewModel
 import com.google.gson.Gson
 import com.muddzdev.styleabletoast.StyleableToast

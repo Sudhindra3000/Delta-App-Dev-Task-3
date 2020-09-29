@@ -4,7 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import com.example.deltatask3.utils.Pokemon;
+import com.example.deltatask3.models.Pokemon;
 
 @Entity(tableName = "favourites_table")
 public class Favourite {

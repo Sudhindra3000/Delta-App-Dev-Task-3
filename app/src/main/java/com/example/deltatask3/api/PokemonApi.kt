@@ -1,6 +1,6 @@
 package com.example.deltatask3.api
 
-import com.example.deltatask3.utils.*
+import com.example.deltatask3.models.*
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
@@ -27,13 +27,13 @@ interface PokemonApi {
     fun getPokemonId(@Path("name") name: String): Call<PokemonId>
 
     @GET("region/{id}/")
-    fun getRegion(@Path("id") id: Int): Call<Region>
+    suspend fun getRegion(@Path("id") id: Int): Response<Region>
 
     @GET("pokedex/{name}/")
-    fun getPokedex(@Path("name") name: String): Call<Pokedex>
+    suspend fun getPokedex(@Path("name") name: String): Response<Pokedex>
 
     @GET("type/{id}/")
-    fun getType(@Path("id") id: Int): Call<Type>
+    suspend fun getType(@Path("id") id: Int): Response<Type>
 
     @GET("item")
     suspend fun getItems(@Query("offset") offset: Int, @Query("limit") limit: Int): Response<SearchResult>

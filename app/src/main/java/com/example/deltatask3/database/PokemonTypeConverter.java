@@ -2,7 +2,7 @@ package com.example.deltatask3.database;
 
 import androidx.room.TypeConverter;
 
-import com.example.deltatask3.utils.Pokemon;
+import com.example.deltatask3.models.Pokemon;
 import com.google.gson.Gson;
 
 public class PokemonTypeConverter {

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.deltatask3.R;
 import com.example.deltatask3.databinding.PokemonRowBinding;
-import com.example.deltatask3.utils.ItemLocation;
+import com.example.deltatask3.models.ItemLocation;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

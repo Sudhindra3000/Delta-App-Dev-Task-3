@@ -1,442 +1,343 @@
-package com.example.deltatask3.activities;
+package com.example.deltatask3.activities
 
-import android.app.ActivityOptions;
-import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.transition.Explode;
-import android.util.Log;
-import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.deltatask3.R;
-import com.example.deltatask3.adapters.PokemonAdapter;
-import com.example.deltatask3.api.PokemonApi;
-import com.example.deltatask3.database.Favourite;
-import com.example.deltatask3.databinding.ActivityPokemonsBinding;
-import com.example.deltatask3.utils.Pokedex;
-import com.example.deltatask3.utils.Pokemon;
-import com.example.deltatask3.utils.Region;
-import com.example.deltatask3.utils.Type;
-import com.example.deltatask3.viewmodels.FavouriteViewModel;
-import com.google.gson.Gson;
-import com.muddzdev.styleabletoast.StyleableToast;
-
-import java.util.ArrayList;
-
-import javax.inject.Inject;
-
-import dagger.hilt.android.AndroidEntryPoint;
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
+import android.app.ActivityOptions
+import android.content.Intent
+import android.graphics.Canvas
+import android.graphics.Color
+import android.os.Bundle
+import android.transition.Explode
+import android.util.Log
+import android.util.Pair
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.deltatask3.R
+import com.example.deltatask3.adapters.PokemonAdapter
+import com.example.deltatask3.api.PokemonApi
+import com.example.deltatask3.database.Favourite
+import com.example.deltatask3.databinding.ActivityPokemonsBinding
+import com.example.deltatask3.firstLetterToUppercase
+import com.example.deltatask3.models.Pokedex
+import com.example.deltatask3.models.Pokemon
+import com.example.deltatask3.showSnackbar
+import com.example.deltatask3.viewmodels.FavouriteViewModel
+import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import com.muddzdev.styleabletoast.StyleableToast
+import dagger.hilt.android.AndroidEntryPoint
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
+import kotlinx.coroutines.*
+import java.util.*
+import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
-public class PokemonsActivity extends AppCompatActivity {
+class PokemonsActivity : AppCompatActivity() {
 
-    private static final String TAG = "PokemonsActivity";
-    private ActivityPokemonsBinding binding;
+    private lateinit var binding: ActivityPokemonsBinding
 
-    private int offset = 0;
+    private var offset = 0
+    private var favouriteViewModel: FavouriteViewModel? = null
+    private val favourites = ArrayList<Favourite>()
 
-    private FavouriteViewModel favouriteViewModel;
-    private ArrayList<Favourite> favourites = new ArrayList<>();
+    private lateinit var searchView: SearchView
 
+    @JvmField
     @Inject
-    PokemonApi pokemonApi;
-
-    private LinearLayoutManager layoutManager;
-    private PokemonAdapter pokemonAdapter;
-    private ArrayList<Pokemon> pokemons = new ArrayList<>(), searchedPokemon = new ArrayList<>();
-    private boolean loading = true, searching = false, paginate = true;
-
-    private int regionID;
-    private Pokedex pokedex;
-    private ArrayList<Pokedex> pokedexes = new ArrayList<>();
-    private ArrayList<String> names = new ArrayList<>();
-
-    private int typeID;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityPokemonsBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        getWindow().setEnterTransition(new Explode());
-        getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        setSupportActionBar(binding.toolbarP);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        favouriteViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(FavouriteViewModel.class);
-        favouriteViewModel.getAllFavourites().observe(this, newFavourites -> {
-            favourites.clear();
-            favourites.addAll(newFavourites);
-        });
-
-        int mode = getIntent().getIntExtra("mode", -1);
-
-        int REGIONS = 45;
+    var pokemonApi: PokemonApi? = null
+    private var layoutManager: LinearLayoutManager? = null
+    private var pokemonAdapter: PokemonAdapter? = null
+    private val pokemons = ArrayList<Pokemon>()
+    private val searchedPokemon = ArrayList<Pokemon>()
+    private var loading = true
+    private var searching = false
+    private var paginate = true
+    private var regionID = 0
+    private var pokedex: Pokedex? = null
+    private val pokedexes = ArrayList<Pokedex>()
+    private val names = ArrayList<String>()
+    private var typeID = 0
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityPokemonsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        window.enterTransition = Explode()
+        window.statusBarColor = resources.getColor(R.color.colorPrimaryDark)
+        val decorView = window.decorView
+        decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        setSupportActionBar(binding.toolbarP)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        favouriteViewModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application)).get(FavouriteViewModel::class.java)
+        favouriteViewModel!!.allFavourites.observe(this, { newFavourites: List<Favourite>? ->
+            favourites.clear()
+            favourites.addAll(newFavourites!!)
+        })
+        val mode = intent.getIntExtra("mode", -1)
+        val REGIONS = 45
         if (mode == REGIONS) {
-            regionID = getIntent().getIntExtra("regionID", 0);
-            regionID++;
-            String regionName = getIntent().getStringExtra("regionName");
-            getSupportActionBar().setTitle("Pokémon in " + regionName + " Region");
-            getRegion();
+            regionID = intent.getIntExtra("regionID", 0)
+            regionID++
+            val regionName = intent.getStringExtra("regionName")
+            supportActionBar!!.title = "Pokémon in $regionName Region"
+            getRegion()
         } else {
-            typeID = getIntent().getIntExtra("typeID", 0);
-            String typeName = getIntent().getStringExtra("typeName");
-            getSupportActionBar().setTitle("Pokémon having " + typeName + " Type");
-            getType();
+            typeID = intent.getIntExtra("typeID", 0)
+            val typeName = intent.getStringExtra("typeName")
+            supportActionBar!!.title = "Pokémon having $typeName Type"
+            getType()
         }
-
-        buildRecyclerView();
+        buildRecyclerView()
     }
 
-    private void buildRecyclerView() {
-        binding.pokemonsList.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
-        pokemonAdapter = new PokemonAdapter();
-        pokemonAdapter.setPokemons(pokemons);
-        pokemonAdapter.setListener(this::showDetails);
-        binding.pokemonsList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+    private fun buildRecyclerView() {
+        binding.pokemonsList.setHasFixedSize(true)
+        layoutManager = LinearLayoutManager(this)
+        pokemonAdapter = PokemonAdapter()
+        pokemonAdapter!!.setPokemons(pokemons)
+        pokemonAdapter!!.setListener { position: Int, pokemonIv: ImageView, nameIv: TextView -> showDetails(position, pokemonIv, nameIv) }
+        binding.pokemonsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
-                    int visibleItemCount = layoutManager.getChildCount();
-                    int totalItemCount = layoutManager.getItemCount();
-                    int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
-
+                    val visibleItemCount = layoutManager!!.childCount
+                    val totalItemCount = layoutManager!!.itemCount
+                    val pastVisibleItems = layoutManager!!.findFirstVisibleItemPosition()
                     if (loading) {
-                        if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
-                            loading = false;
-                            Log.i(TAG, "onScrolled: LastItem");
-                            paginate();
+                        if (visibleItemCount + pastVisibleItems >= totalItemCount) {
+                            loading = false
+                            Log.i(TAG, "onScrolled: LastItem")
+                            paginate()
                         }
                     }
                 }
             }
-        });
-        binding.pokemonsList.setLayoutManager(layoutManager);
-        binding.pokemonsList.setAdapter(pokemonAdapter);
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
+        })
+        binding.pokemonsList.layoutManager = layoutManager
+        binding.pokemonsList.adapter = pokemonAdapter
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
             }
 
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                Pokemon swipedPokemon = pokemonAdapter.getPokemonAt(viewHolder.getAdapterPosition());
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val swipedPokemon = pokemonAdapter!!.getPokemonAt(viewHolder.adapterPosition)
                 if (pokemonIsInFavourites(swipedPokemon)) {
-                    pokemonAdapter.notifyItemChanged(viewHolder.getAdapterPosition());
-                    StyleableToast.makeText(getApplicationContext(), firstLetterToUppercase(swipedPokemon.getName()) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
+                    pokemonAdapter!!.notifyItemChanged(viewHolder.adapterPosition)
+                    StyleableToast.makeText(applicationContext, firstLetterToUppercase(swipedPokemon.name) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
                 } else {
-                    addToFavourites(viewHolder.getAdapterPosition(), swipedPokemon);
+                    addToFavourites(viewHolder.adapterPosition, swipedPokemon)
                 }
             }
 
-            @Override
-            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+                RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                         .addSwipeRightBackgroundColor(Color.parseColor("#EB3939"))
                         .addSwipeRightActionIcon(R.drawable.favourite_icon)
                         .create()
-                        .decorate();
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                        .decorate()
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
-        }).attachToRecyclerView(binding.pokemonsList);
+        }).attachToRecyclerView(binding.pokemonsList)
     }
 
-    private boolean pokemonIsInFavourites(Pokemon pokemon) {
-        for (Favourite favourite : favourites) {
-            if (favourite.getPokemon().getId() == pokemon.getId())
-                return true;
+    private fun pokemonIsInFavourites(pokemon: Pokemon): Boolean {
+        for (favourite in favourites) {
+            if (favourite.pokemon.id == pokemon.id) return true
         }
-        return false;
+        return false
     }
 
-    private void addToFavourites(int position, Pokemon pokemon) {
-        StyleableToast.makeText(this, firstLetterToUppercase(pokemon.getName()) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show();
-        favouriteViewModel.insert(new Favourite(pokemon));
-        offset--;
-        names.remove(pokemon.getName());
-        pokemons.remove(pokemon);
-        if (searching)
-            searchedPokemon.remove(pokemon);
-        pokemonAdapter.notifyItemRemoved(position);
+    private fun addToFavourites(position: Int, pokemon: Pokemon) {
+        StyleableToast.makeText(this, firstLetterToUppercase(pokemon.name) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
+        favouriteViewModel!!.insert(Favourite(pokemon))
+        offset--
+        names.remove(pokemon.name)
+        pokemons.remove(pokemon)
+        if (searching) searchedPokemon.remove(pokemon)
+        pokemonAdapter!!.notifyItemRemoved(position)
     }
 
-    private void paginate() {
+    private fun paginate() {
         if (paginate) {
-            offset += 20;
-            loadPokemon();
-            loading = true;
+            offset += 20
+            loadPokemon()
+            loading = true
         }
     }
 
-    private void getRegion() {
-        Call<Region> call = pokemonApi.getRegion(regionID);
-        call.enqueue(new Callback<Region>() {
-            @Override
-            public void onResponse(Call<Region> call, Response<Region> response) {
-                if (!response.isSuccessful()) {
-                    Log.i(TAG, "onResponse: " + response);
-                    return;
+    private fun getRegion() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val regionResponse = pokemonApi!!.getRegion(regionID)
+            if (!regionResponse.isSuccessful)
+                withContext(Dispatchers.Main) {
+                    showSnackbar(binding.root, "Failed to fetch Region", Snackbar.LENGTH_SHORT)
                 }
-
-                switch (regionID) {
-                    case 1:
-                        pokedex = response.body().getPokedexes().get(0);
-                        break;
-                    case 6:
-                        pokedexes.addAll(response.body().getPokedexes());
-                        break;
-                    default:
-                        pokedex = response.body().getPokedexes().get(1);
-                        break;
+            else {
+                when (regionID) {
+                    1 -> pokedex = regionResponse.body()!!.pokedexes[0]
+                    6 -> pokedexes.addAll(regionResponse.body()!!.pokedexes)
+                    else -> pokedex = regionResponse.body()!!.pokedexes[1]
                 }
-
-                Log.i(TAG, "size=" + names.size());
-                loadPokedexForRegion();
+                loadPokedexForRegion()
             }
-
-            @Override
-            public void onFailure(Call<Region> call, Throwable t) {
-                Log.i(TAG, "t=" + t.getLocalizedMessage());
-            }
-        });
+        }
     }
 
-    private void loadPokedexForRegion() {
+    private suspend fun loadPokedexForRegion() {
         if (regionID == 6) {
-            ArrayList<String> names2 = new ArrayList<>(), names3 = new ArrayList<>();
-            for (Pokedex pokedex1 : pokedexes) {
-                Call<Pokedex> call = pokemonApi.getPokedex(pokedex1.getName());
-                call.enqueue(new Callback<Pokedex>() {
-                    @Override
-                    public void onResponse(Call<Pokedex> call, Response<Pokedex> response) {
-                        if (!response.isSuccessful()) {
-                            Log.i(TAG, "onResponse: " + response);
-                            return;
-                        }
-
-
-                        for (Pokedex.PokemonEntry pokemonEntry : response.body().getPokemon_entries()) {
-                            String name = pokemonEntry.getPokemon_species().getName();
-                            switch (pokedexes.indexOf(pokedex1)) {
-                                case 0:
-                                    names.add(name);
-                                    break;
-                                case 1:
-                                    names2.add(name);
-                                    break;
-                                case 2:
-                                    names3.add(name);
-                                    break;
-                            }
-                        }
-
-                        if (pokedexes.indexOf(pokedex1) == 2) {
-                            names.addAll(names2);
-                            names.addAll(names3);
-                            names2.clear();
-                            names3.clear();
-                            Log.i(TAG, "size=" + names.size());
-                            loadPokemon();
+            val names2 = ArrayList<String>()
+            val names3 = ArrayList<String>()
+            for (pokedex1 in pokedexes) {
+                val pokedexResponse = pokemonApi!!.getPokedex(pokedex1.name)
+                if (!pokedexResponse.isSuccessful)
+                    withContext(Dispatchers.Main) {
+                        showSnackbar(binding.root, "Failed to fetch Pokemon", Snackbar.LENGTH_SHORT)
+                    }
+                else {
+                    for (pokemonEntry in pokedexResponse.body()!!.pokemon_entries) {
+                        val name = pokemonEntry.pokemon_species.name
+                        when (pokedexes.indexOf(pokedex1)) {
+                            0 -> names.add(name)
+                            1 -> names2.add(name)
+                            2 -> names3.add(name)
                         }
                     }
-
-                    @Override
-                    public void onFailure(Call<Pokedex> call, Throwable t) {
-                        Log.i(TAG, "t=" + t.getLocalizedMessage());
+                    if (pokedexes.indexOf(pokedex1) == 2) {
+                        names.addAll(names2)
+                        names.addAll(names3)
+                        loadPokemon()
                     }
-                });
+                }
             }
-
         } else {
-            Call<Pokedex> call = pokemonApi.getPokedex(pokedex.getName());
-            call.enqueue(new Callback<Pokedex>() {
-                @Override
-                public void onResponse(Call<Pokedex> call, Response<Pokedex> response) {
-                    if (!response.isSuccessful()) {
-                        Log.i(TAG, "onResponse: " + response);
-                        return;
-                    }
-
-                    for (Pokedex.PokemonEntry pokemonEntry : response.body().getPokemon_entries()) {
-                        names.add(pokemonEntry.getPokemon_species().getName());
-                    }
-                    Log.i(TAG, "size=" + names.size());
-
-                    loadPokemon();
+            val pokedexResponse = pokemonApi!!.getPokedex(pokedex!!.name)
+            if (!pokedexResponse.isSuccessful)
+                withContext(Dispatchers.Main) {
+                    showSnackbar(binding.root, "Failed to fetch Pokemon", Snackbar.LENGTH_SHORT)
                 }
-
-                @Override
-                public void onFailure(Call<Pokedex> call, Throwable t) {
-                    Log.i(TAG, "t=" + t.getLocalizedMessage());
-                }
-            });
-        }
-    }
-
-    private void getType() {
-        Call<Type> call = pokemonApi.getType(typeID);
-        call.enqueue(new Callback<Type>() {
-            @Override
-            public void onResponse(Call<Type> call, Response<Type> response) {
-                if (!response.isSuccessful()) {
-                    Log.i(TAG, "onResponse: " + response);
-                    return;
-                }
-
-                for (Type.TypePokemon typePokemon : response.body().getPokemon()) {
-                    names.add(typePokemon.getPokemon().getName());
-                }
-
-                Log.i(TAG, "size=" + names.size());
-                loadPokemon();
+            else {
+                for (pokemonEntry in pokedexResponse.body()!!.pokemon_entries)
+                    names.add(pokemonEntry.pokemon_species.name)
+                Log.i(TAG, "size=" + names.size)
+                loadPokemon()
             }
+        }
+    }
 
-            @Override
-            public void onFailure(Call<Type> call, Throwable t) {
-                Log.i(TAG, "t=" + t.getLocalizedMessage());
+    private fun getType() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val typeResponse = pokemonApi!!.getType(typeID)
+            if (!typeResponse.isSuccessful)
+                withContext(Dispatchers.Main) {
+                    showSnackbar(binding.root, "Failed to fetch Type", Snackbar.LENGTH_SHORT)
+                }
+            else {
+                for (typePokemon in typeResponse.body()!!.pokemon)
+                    names.add(typePokemon.pokemon.name)
+                loadPokemon()
             }
-        });
-    }
-
-    private void loadPokemon() {
-        int toIndex;
-        if (offset + 20 > names.size() - 1) {
-            toIndex = names.size() - 1;
-            paginate = false;
-        } else
-            toIndex = offset + 20;
-        Log.i(TAG, "from:" + offset + ", to:" + toIndex);
-        for (String s : names.subList(offset, toIndex)) {
-            pokemons.add(new Pokemon(s));
-            //Todo: Complete this using Coroutines
-
-//            Call<Pokemon> call = pokemonApi.getPokemon(s);
-//            call.enqueue(new Callback<Pokemon>() {
-//                @Override
-//                public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
-//                    if (!response.isSuccessful()) {
-//                        Log.i(TAG, "onResponse: " + response);
-//                        return;
-//                    }
-//
-//                    if (names.indexOf(s) >= 0)
-//                        pokemons.set(names.indexOf(s), response.body());
-//                    if (searching)
-//                        searchPokemonByName(searchView.getQuery().toString().trim().toLowerCase());
-//                    pokemonAdapter.notifyDataSetChanged();
-//                }
-//
-//                @Override
-//                public void onFailure(Call<Pokemon> call, Throwable t) {
-//                    Log.i(TAG, "t=" + t.getLocalizedMessage());
-//                }
-//            });
         }
     }
 
-    private void searchPokemonByName(String name) {
-        name = name.trim().toLowerCase();
-        searchedPokemon.clear();
-
-        for (Pokemon pokemon : pokemons) {
-            if (pokemon.getName().trim().contains(name))
-                searchedPokemon.add(pokemon);
-        }
-
-        pokemonAdapter.setPokemons(searchedPokemon);
-        pokemonAdapter.notifyDataSetChanged();
-    }
-
-    private void showDetails(int position, ImageView pokemonIv, TextView nameIv) {
-        Pokemon pokemon = pokemonAdapter.getPokemonAt(position);
-        if (pokemon.getId() != 0 && pokemon.getSprites() != null) {
-            Intent intent = new Intent(PokemonsActivity.this, PokemonDetailsActivity.class);
-            Gson gson = new Gson();
-            String pokemonJson = gson.toJson(pokemon);
-            intent.putExtra("pokemonJson", pokemonJson);
-            Pair<View, String> imagePair = new Pair<>(pokemonIv, "pokemonImg");
-            Pair<View, String> namePair = new Pair<>(nameIv, "pokemonName");
-            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(PokemonsActivity.this, imagePair, namePair);
-            startActivity(intent, options.toBundle());
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.search_menu, menu);
-
-        MenuItem searchItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint("Search Pokémon");
-        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Log.i(TAG, "submit");
-                searching = true;
-                if (query.length() == 0) {
-                    searchedPokemon.clear();
-                    pokemonAdapter.setPokemons(pokemons);
-                    pokemonAdapter.notifyDataSetChanged();
+    private fun loadPokemon() {
+        val toIndex: Int
+        if (offset + 20 > names.size - 1) {
+            toIndex = names.size - 1
+            paginate = false
+        } else toIndex = offset + 20
+        val subList = names.subList(offset, toIndex)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val deferredList = ArrayList<Deferred<Pokemon>>()
+            for (s in subList)
+                deferredList.add(async { pokemonApi!!.getPokemon(s).body()!! })
+            pokemons.addAll(deferredList.awaitAll())
+            withContext(Dispatchers.Main) {
+                if (!searching) {
+                    binding.pokemonsList.setHasFixedSize(false)
+                    pokemonAdapter!!.notifyItemRangeInserted(pokemons.size - subList.size, subList.size)
+                    binding.pokemonsList.setHasFixedSize(true)
                 } else
-                    searchPokemonByName(query.toLowerCase().trim());
-                return false;
+                    searchPokemonByName(searchView.query.toString().trim().toLowerCase(Locale.ROOT))
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                searching = true;
-                if (newText.length() == 0) {
-                    searchedPokemon.clear();
-                    pokemonAdapter.setPokemons(pokemons);
-                    pokemonAdapter.notifyDataSetChanged();
-                } else
-                    searchPokemonByName(newText.toLowerCase().trim());
-                return true;
-            }
-        });
-        return super.onCreateOptionsMenu(menu);
+        }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
+    private fun searchPokemonByName(name: String) {
+        searchedPokemon.clear()
+        for (pokemon in pokemons)
+            if (pokemon.name.trim().contains(name)) searchedPokemon.add(pokemon)
+        pokemonAdapter!!.setPokemons(searchedPokemon)
+        pokemonAdapter!!.notifyDataSetChanged()
+    }
+
+    private fun showDetails(position: Int, pokemonIv: ImageView, nameIv: TextView) {
+        val pokemon = pokemonAdapter!!.getPokemonAt(position)
+        if (pokemon.id != 0 && pokemon.sprites != null) {
+            val intent = Intent(this@PokemonsActivity, PokemonDetailsActivity::class.java)
+            val gson = Gson()
+            val pokemonJson = gson.toJson(pokemon)
+            intent.putExtra("pokemonJson", pokemonJson)
+            val imagePair = Pair<View, String>(pokemonIv, "pokemonImg")
+            val namePair = Pair<View, String>(nameIv, "pokemonName")
+            val options = ActivityOptions.makeSceneTransitionAnimation(this@PokemonsActivity, imagePair, namePair)
+            startActivity(intent, options.toBundle())
         }
-        return super.onOptionsItemSelected(item);
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.search_menu, menu)
+        val searchItem = menu.findItem(R.id.search)
+        searchView = searchItem.actionView as SearchView
+        searchView.queryHint = "Search Pokémon"
+        searchView.imeOptions = EditorInfo.IME_ACTION_DONE
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                Log.i(TAG, "submit")
+                searching = true
+                if (query.length == 0) {
+                    searchedPokemon.clear()
+                    pokemonAdapter!!.setPokemons(pokemons)
+                    pokemonAdapter!!.notifyDataSetChanged()
+                } else searchPokemonByName(query.toLowerCase(Locale.ROOT).trim())
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                searching = true
+                if (newText.isEmpty()) {
+                    searchedPokemon.clear()
+                    pokemonAdapter!!.setPokemons(pokemons)
+                    pokemonAdapter!!.notifyDataSetChanged()
+                } else searchPokemonByName(newText.toLowerCase(Locale.ROOT).trim())
+                return true
+            }
+        })
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    companion object {
+        private const val TAG = "PokemonsActivity"
     }
 }

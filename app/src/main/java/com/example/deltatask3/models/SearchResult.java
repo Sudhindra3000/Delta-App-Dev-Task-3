@@ -1,4 +1,4 @@
-package com.example.deltatask3.utils;
+package com.example.deltatask3.models;
 
 import com.google.gson.annotations.SerializedName;
 

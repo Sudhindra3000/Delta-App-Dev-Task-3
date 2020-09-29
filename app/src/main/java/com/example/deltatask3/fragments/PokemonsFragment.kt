@@ -26,8 +26,8 @@ import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.database.Favourite
 import com.example.deltatask3.databinding.FragmentPokemonsBinding
 import com.example.deltatask3.firstLetterToUppercase
+import com.example.deltatask3.models.Pokemon
 import com.example.deltatask3.showSnackbar
-import com.example.deltatask3.utils.Pokemon
 import com.example.deltatask3.viewmodels.FavouriteViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson

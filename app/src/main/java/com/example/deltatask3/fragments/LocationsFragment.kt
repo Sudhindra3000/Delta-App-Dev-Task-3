@@ -13,8 +13,8 @@ import com.example.deltatask3.R
 import com.example.deltatask3.adapters.ItemLocationAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.databinding.FragmentLocationsBinding
+import com.example.deltatask3.models.ItemLocation
 import com.example.deltatask3.showSnackbar
-import com.example.deltatask3.utils.ItemLocation
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
