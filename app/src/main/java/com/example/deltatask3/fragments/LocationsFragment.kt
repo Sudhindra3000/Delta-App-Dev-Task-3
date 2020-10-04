@@ -37,7 +37,7 @@ class LocationsFragment : Fragment() {
 
     private val locations = ArrayList<ItemLocation>()
     private val searchedLocations = ArrayList<ItemLocation>()
-    private lateinit var adapter: ItemLocationAdapter
+    private val adapter = ItemLocationAdapter(locations)
     private lateinit var layoutManager: LinearLayoutManager
 
     private var offset = 0
@@ -58,8 +58,6 @@ class LocationsFragment : Fragment() {
     private fun buildRecyclerView() {
         binding.allLocations.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(requireContext())
-        adapter = ItemLocationAdapter()
-        adapter.setItemLocations(locations)
         binding.allLocations.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
@@ -107,13 +105,10 @@ class LocationsFragment : Fragment() {
     }
 
     private fun searchLocationsByName(name: String) {
-        var name = name
-        name = name.trim().toLowerCase(Locale.ROOT)
         searchedLocations.clear()
-        for (item in locations) {
+        for (item in locations)
             if (item.name.trim().contains(name)) searchedLocations.add(item)
-        }
-        adapter.setItemLocations(searchedLocations)
+        adapter.itemLocations = searchedLocations
         adapter.notifyDataSetChanged()
     }
 
@@ -125,14 +120,12 @@ class LocationsFragment : Fragment() {
         searchView.queryHint = "Search Locations"
         searchView.imeOptions = EditorInfo.IME_ACTION_DONE
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                return false
-            }
+            override fun onQueryTextSubmit(query: String) = false
 
             override fun onQueryTextChange(newText: String): Boolean {
                 if (newText.isEmpty()) {
                     searchedLocations.clear()
-                    adapter.setItemLocations(locations)
+                    adapter.itemLocations = locations
                     adapter.notifyDataSetChanged()
                 } else searchLocationsByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true

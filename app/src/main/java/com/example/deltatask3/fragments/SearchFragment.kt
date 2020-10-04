@@ -44,7 +44,7 @@ class SearchFragment : Fragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
-    private var favouriteViewModel: FavouriteViewModel? = null
+    private lateinit var favouriteViewModel: FavouriteViewModel
 
     private var searchJob: Job? = null
 
@@ -55,8 +55,8 @@ class SearchFragment : Fragment() {
     private val locations = ArrayList<ItemLocation>()
     private val items = ArrayList<ItemLocation>()
     private lateinit var pokemonAdapter: PokemonAdapter
-    private lateinit var locationAdapter: ItemLocationAdapter
-    private lateinit var itemAdapter: ItemLocationAdapter
+    private val locationAdapter = ItemLocationAdapter(locations)
+    private val itemAdapter = ItemLocationAdapter(items)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -107,14 +107,10 @@ class SearchFragment : Fragment() {
         binding.pokemonCard.adapter = pokemonAdapter
         binding.itemCard.setHasFixedSize(true)
         val itemLayoutManager = LinearLayoutManager(requireContext())
-        itemAdapter = ItemLocationAdapter()
-        itemAdapter.setItemLocations(items)
         binding.itemCard.layoutManager = itemLayoutManager
         binding.itemCard.adapter = itemAdapter
         binding.locationCard.setHasFixedSize(true)
         val locationLayoutManager = LinearLayoutManager(requireContext())
-        locationAdapter = ItemLocationAdapter()
-        locationAdapter.setItemLocations(locations)
         binding.locationCard.layoutManager = locationLayoutManager
         binding.locationCard.adapter = locationAdapter
     }

@@ -37,7 +37,7 @@ class ItemsFragment : Fragment() {
 
     private val items = ArrayList<ItemLocation>()
     private val searchedItems = ArrayList<ItemLocation>()
-    private lateinit var adapter: ItemLocationAdapter
+    private val adapter = ItemLocationAdapter(items)
     private lateinit var layoutManager: LinearLayoutManager
 
     private var offset = 0
@@ -59,8 +59,6 @@ class ItemsFragment : Fragment() {
     private fun buildRecyclerView() {
         binding.allItems.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(requireContext())
-        adapter = ItemLocationAdapter()
-        adapter.setItemLocations(items)
         binding.allItems.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
@@ -108,13 +106,11 @@ class ItemsFragment : Fragment() {
     }
 
     private fun searchItemsByName(name: String) {
-        var name = name
-        name = name.trim { it <= ' ' }.toLowerCase(Locale.ROOT)
         searchedItems.clear()
         for (item in items) {
             if (item.name.trim().contains(name)) searchedItems.add(item)
         }
-        adapter.setItemLocations(searchedItems)
+        adapter.itemLocations = searchedItems
         adapter.notifyDataSetChanged()
     }
 
@@ -126,14 +122,12 @@ class ItemsFragment : Fragment() {
         searchView.queryHint = "Search Items"
         searchView.imeOptions = EditorInfo.IME_ACTION_DONE
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                return false
-            }
+            override fun onQueryTextSubmit(query: String) = false
 
             override fun onQueryTextChange(newText: String): Boolean {
                 if (newText.isEmpty()) {
                     searchedItems.clear()
-                    adapter.setItemLocations(items)
+                    adapter.itemLocations = items
                     adapter.notifyDataSetChanged()
                 } else searchItemsByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true
