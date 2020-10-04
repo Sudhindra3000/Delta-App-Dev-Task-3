@@ -57,7 +57,7 @@ class PokemonsFragment : Fragment() {
     private val allPokemons = ArrayList<Pokemon>()
     private val favourites = ArrayList<Favourite>()
     private val searchedPokemon = ArrayList<Pokemon>()
-    private lateinit var pokemonAdapter: PokemonAdapter
+    private val pokemonAdapter = PokemonAdapter(allPokemons) { position: Int, pokemonIv: ImageView, nameIv: TextView -> showDetails(position, pokemonIv, nameIv) }
     private lateinit var layoutManager: LinearLayoutManager
 
     private var offset = 0
@@ -90,9 +90,6 @@ class PokemonsFragment : Fragment() {
     private fun buildRecyclerView() {
         binding.allPokemonList.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(requireContext())
-        pokemonAdapter = PokemonAdapter()
-        pokemonAdapter.setPokemons(allPokemons)
-        pokemonAdapter.setListener { position: Int, pokemonIv: ImageView, nameIv: TextView -> showDetails(position, pokemonIv, nameIv) }
         binding.allPokemonList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
@@ -183,7 +180,7 @@ class PokemonsFragment : Fragment() {
         searchedPokemon.clear()
         for (pokemon in allPokemons)
             if (pokemon.name.trim().contains(name)) searchedPokemon.add(pokemon)
-        pokemonAdapter.setPokemons(searchedPokemon)
+        pokemonAdapter.pokemons = searchedPokemon
         pokemonAdapter.notifyDataSetChanged()
     }
 
@@ -214,7 +211,7 @@ class PokemonsFragment : Fragment() {
                 searching = true
                 if (query.isEmpty()) {
                     searchedPokemon.clear()
-                    pokemonAdapter.setPokemons(allPokemons)
+                    pokemonAdapter.pokemons = allPokemons
                     pokemonAdapter.notifyDataSetChanged()
                 } else searchPokemonByName(query.toLowerCase(Locale.ROOT).trim())
                 return false
@@ -224,7 +221,7 @@ class PokemonsFragment : Fragment() {
                 searching = true
                 if (newText.isEmpty()) {
                     searchedPokemon.clear()
-                    pokemonAdapter.setPokemons(allPokemons)
+                    pokemonAdapter.pokemons = allPokemons
                     pokemonAdapter.notifyDataSetChanged()
                 } else searchPokemonByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true

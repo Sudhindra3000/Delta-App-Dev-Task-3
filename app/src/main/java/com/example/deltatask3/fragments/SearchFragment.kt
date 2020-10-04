@@ -54,7 +54,7 @@ class SearchFragment : Fragment() {
     private val pokemons = ArrayList<Pokemon>()
     private val locations = ArrayList<ItemLocation>()
     private val items = ArrayList<ItemLocation>()
-    private lateinit var pokemonAdapter: PokemonAdapter
+    private val pokemonAdapter = PokemonAdapter(pokemons) { _: Int, pokemon: ImageView, name: TextView -> showDetails(pokemon, name) }
     private val locationAdapter = ItemLocationAdapter(locations)
     private val itemAdapter = ItemLocationAdapter(items)
 
@@ -74,9 +74,6 @@ class SearchFragment : Fragment() {
     private fun buildRecyclerView() {
         binding.pokemonCard.setHasFixedSize(true)
         val pokemonLayoutManager = LinearLayoutManager(requireContext())
-        pokemonAdapter = PokemonAdapter()
-        pokemonAdapter.setPokemons(pokemons)
-        pokemonAdapter.setListener { _: Int, pokemon: ImageView, name: TextView -> showDetails(pokemon, name) }
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 return false

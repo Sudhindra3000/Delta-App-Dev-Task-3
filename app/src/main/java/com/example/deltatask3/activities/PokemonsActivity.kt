@@ -57,8 +57,8 @@ class PokemonsActivity : AppCompatActivity() {
     lateinit var pokemonApi: PokemonApi
 
     private lateinit var layoutManager: LinearLayoutManager
-    private lateinit var pokemonAdapter: PokemonAdapter
     private val pokemons = ArrayList<Pokemon>()
+    private val pokemonAdapter = PokemonAdapter(pokemons) { position: Int, pokemonIv: ImageView, nameIv: TextView -> showDetails(position, pokemonIv, nameIv) }
     private val searchedPokemon = ArrayList<Pokemon>()
 
     private var loading = true
@@ -107,9 +107,6 @@ class PokemonsActivity : AppCompatActivity() {
     private fun buildRecyclerView() {
         binding.pokemonsList.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(this)
-        pokemonAdapter = PokemonAdapter()
-        pokemonAdapter.setPokemons(pokemons)
-        pokemonAdapter.setListener { position: Int, pokemonIv: ImageView, nameIv: TextView -> showDetails(position, pokemonIv, nameIv) }
         binding.pokemonsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
@@ -271,8 +268,9 @@ class PokemonsActivity : AppCompatActivity() {
     private fun searchPokemonByName(name: String) {
         searchedPokemon.clear()
         for (pokemon in pokemons)
-            if (pokemon.name.trim().contains(name)) searchedPokemon.add(pokemon)
-        pokemonAdapter.setPokemons(searchedPokemon)
+            if (pokemon.name.trim().contains(name))
+                searchedPokemon.add(pokemon)
+        pokemonAdapter.pokemons = searchedPokemon
         pokemonAdapter.notifyDataSetChanged()
     }
 
@@ -301,9 +299,9 @@ class PokemonsActivity : AppCompatActivity() {
             override fun onQueryTextSubmit(query: String): Boolean {
                 Log.i(TAG, "submit")
                 searching = true
-                if (query.length == 0) {
+                if (query.isEmpty()) {
                     searchedPokemon.clear()
-                    pokemonAdapter.setPokemons(pokemons)
+                    pokemonAdapter.pokemons = pokemons
                     pokemonAdapter.notifyDataSetChanged()
                 } else searchPokemonByName(query.toLowerCase(Locale.ROOT).trim())
                 return false
@@ -313,7 +311,7 @@ class PokemonsActivity : AppCompatActivity() {
                 searching = true
                 if (newText.isEmpty()) {
                     searchedPokemon.clear()
-                    pokemonAdapter.setPokemons(pokemons)
+                    pokemonAdapter.pokemons = pokemons
                     pokemonAdapter.notifyDataSetChanged()
                 } else searchPokemonByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true
