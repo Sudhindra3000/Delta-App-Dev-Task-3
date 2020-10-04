@@ -80,7 +80,8 @@ class FavouritesFragment : Fragment() {
                 binding.favourites.visibility = View.VISIBLE
                 setHasOptionsMenu(true)
             }
-            if (searching) adapter.setFavourites(searchedFavourites) else adapter.setFavourites(favourites)
+            if (searching) adapter.favourites = searchedFavourites
+            else adapter.favourites = favourites as List<Favourite>
             if (removed) adapter.notifyItemRemoved(removedPos) else adapter.notifyDataSetChanged()
             removed = false
         })
@@ -89,8 +90,7 @@ class FavouritesFragment : Fragment() {
     private fun buildRecyclerView() {
         binding.favourites.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(requireContext())
-        adapter = FavouriteAdapter()
-        adapter.setListener(object : FavouriteListener {
+        adapter = FavouriteAdapter(object : FavouriteListener {
             override fun onItemClicked(pos: Int, pokemon: ImageView, name: TextView) {
                 showDetails(adapter.getFavouriteAt(pos).pokemon, pokemon, name)
             }
@@ -212,7 +212,7 @@ class FavouritesFragment : Fragment() {
                 searchedFavourites.add(favouriteS)
             }
         }
-        adapter.setFavourites(searchedFavourites)
+        adapter.favourites = searchedFavourites
         adapter.notifyDataSetChanged()
     }
 
@@ -232,7 +232,7 @@ class FavouritesFragment : Fragment() {
                 searching = true
                 if (query.isEmpty()) {
                     searchedFavourites.clear()
-                    adapter.setFavourites(favouriteViewModel.allFavourites.value)
+                    adapter.favourites = favouriteViewModel.allFavourites.value as List<Favourite>
                     adapter.notifyDataSetChanged()
                 } else searchFavouritesByName(query.toLowerCase().trim())
                 return false
@@ -242,7 +242,7 @@ class FavouritesFragment : Fragment() {
                 searching = true
                 if (newText.isEmpty()) {
                     searchedFavourites.clear()
-                    adapter.setFavourites(favouriteViewModel.allFavourites.value)
+                    adapter.favourites = favouriteViewModel.allFavourites.value as List<Favourite>
                     adapter.notifyDataSetChanged()
                 } else searchFavouritesByName(newText.toLowerCase().trim())
                 return true

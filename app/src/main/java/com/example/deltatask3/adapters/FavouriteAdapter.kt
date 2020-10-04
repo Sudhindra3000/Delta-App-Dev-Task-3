@@ -1,82 +1,54 @@
-package com.example.deltatask3.adapters;
+package com.example.deltatask3.adapters
 
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.deltatask3.R
+import com.example.deltatask3.adapters.FavouriteAdapter.FavouriteViewHolder
+import com.example.deltatask3.database.Favourite
+import com.example.deltatask3.databinding.FavouriteRowBinding
+import com.example.deltatask3.firstLetterToUppercase
+import com.squareup.picasso.Picasso
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+class FavouriteAdapter(
+        private var listener: FavouriteListener
+) : RecyclerView.Adapter<FavouriteViewHolder>() {
 
-import com.example.deltatask3.R;
-import com.example.deltatask3.database.Favourite;
-import com.example.deltatask3.databinding.FavouriteRowBinding;
-import com.example.deltatask3.models.Pokemon;
-import com.squareup.picasso.Picasso;
+    lateinit var favourites: List<Favourite>
 
-import java.util.List;
+    interface FavouriteListener {
+        fun onItemClicked(pos: Int, pokemon: ImageView, name: TextView)
 
-import static com.example.deltatask3.UtilsKt.firstLetterToUppercase;
-
-public class FavouriteAdapter extends RecyclerView.Adapter<FavouriteAdapter.FavouriteViewHolder> {
-
-    private List<Favourite> favourites;
-    private FavouriteListener listener;
-
-    public void setFavourites(List<Favourite> favourites) {
-        this.favourites = favourites;
+        fun onShareClicked(pos: Int, imageView: ImageView)
     }
 
-    public void setListener(FavouriteListener listener) {
-        this.listener = listener;
-    }
-
-    public interface FavouriteListener {
-        void onItemClicked(int pos, ImageView pokemon, TextView name);
-
-        void onShareClicked(int pos, ImageView imageView);
-    }
-
-    public static class FavouriteViewHolder extends RecyclerView.ViewHolder {
-
-        FavouriteRowBinding binding;
-
-        public FavouriteViewHolder(@NonNull FavouriteRowBinding favouriteRowBinding, FavouriteListener listener) {
-            super(favouriteRowBinding.getRoot());
-            binding = favouriteRowBinding;
-            binding.favRow.setOnClickListener(v -> listener.onItemClicked(getAdapterPosition(), binding.ivF, binding.tvFName));
-            binding.shareButton.setOnClickListener(v -> listener.onShareClicked(getAdapterPosition(), binding.ivF));
+    class FavouriteViewHolder(var binding: FavouriteRowBinding, listener: FavouriteListener?) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.favRow.setOnClickListener { listener!!.onItemClicked(adapterPosition, binding.ivF, binding.tvFName) }
+            binding.shareButton.setOnClickListener { listener!!.onShareClicked(adapterPosition, binding.ivF) }
         }
     }
 
-    @NonNull
-    @Override
-    public FavouriteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        FavouriteRowBinding binding = FavouriteRowBinding.inflate(layoutInflater, parent, false);
-        return new FavouriteViewHolder(binding, listener);
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouriteViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = FavouriteRowBinding.inflate(layoutInflater, parent, false)
+        return FavouriteViewHolder(binding, listener)
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull FavouriteViewHolder holder, int position) {
-        Pokemon pokemon = favourites.get(position).getPokemon();
-
-        if (pokemon.getSprites() != null) {
-            String urlSprite = pokemon.getSprites().getFront_default();
-            if (urlSprite != null && !urlSprite.isEmpty())
-                Picasso.get().load(urlSprite).placeholder(R.drawable.placeholder_image).into(holder.binding.ivF);
+    override fun onBindViewHolder(holder: FavouriteViewHolder, position: Int) {
+        val pokemon = favourites[position].pokemon
+        if (pokemon.sprites != null) {
+            val urlSprite = pokemon.sprites.front_default
+            if (urlSprite != null && urlSprite.isNotEmpty())
+                Picasso.get().load(urlSprite).placeholder(R.drawable.placeholder_image).into(holder.binding.ivF)
         }
-        holder.binding.tvFId.setText(String.valueOf(pokemon.getId()));
-        holder.binding.tvFName.setText(firstLetterToUppercase(pokemon.getName()));
+        holder.binding.tvFId.text = pokemon.id.toString()
+        holder.binding.tvFName.text = firstLetterToUppercase(pokemon.name)
     }
 
-    @Override
-    public int getItemCount() {
-        if (favourites == null) return 0;
-        return favourites.size();
-    }
+    override fun getItemCount() = favourites.size
 
-    public Favourite getFavouriteAt(int pos) {
-        return favourites.get(pos);
-    }
+    fun getFavouriteAt(pos: Int) = favourites[pos]
 }
