@@ -14,7 +14,7 @@ import com.example.deltatask3.adapters.ItemLocationAdapter
 import com.example.deltatask3.api.PokemonApi
 import com.example.deltatask3.databinding.FragmentLocationsBinding
 import com.example.deltatask3.models.ItemLocation
-import com.example.deltatask3.showSnackbar
+import com.example.deltatask3.showSnackbarInMain
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
@@ -32,13 +32,14 @@ class LocationsFragment : Fragment() {
     private var _binding: FragmentLocationsBinding? = null
     private val binding get() = _binding!!
 
-    @JvmField
     @Inject
-    var pokemonApi: PokemonApi? = null
-    private val locations = ArrayList<ItemLocation?>()
-    private val searchedLocations = ArrayList<ItemLocation?>()
-    private var adapter: ItemLocationAdapter? = null
-    private var layoutManager: LinearLayoutManager? = null
+    lateinit var pokemonApi: PokemonApi
+
+    private val locations = ArrayList<ItemLocation>()
+    private val searchedLocations = ArrayList<ItemLocation>()
+    private lateinit var adapter: ItemLocationAdapter
+    private lateinit var layoutManager: LinearLayoutManager
+
     private var offset = 0
     private var loading = true
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -58,13 +59,13 @@ class LocationsFragment : Fragment() {
         binding.allLocations.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(requireContext())
         adapter = ItemLocationAdapter()
-        adapter!!.setItemLocations(locations)
+        adapter.setItemLocations(locations)
         binding.allLocations.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0) {
-                    val visibleItemCount = layoutManager!!.childCount
-                    val totalItemCount = layoutManager!!.itemCount
-                    val pastVisibleItems = layoutManager!!.findFirstVisibleItemPosition()
+                    val visibleItemCount = layoutManager.childCount
+                    val totalItemCount = layoutManager.itemCount
+                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
                     if (loading) {
                         if (visibleItemCount + pastVisibleItems >= totalItemCount) {
                             loading = false
@@ -86,21 +87,19 @@ class LocationsFragment : Fragment() {
 
     private fun getLocations() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val response = pokemonApi!!.getLocations(offset, 20)
+            val response = pokemonApi.getLocations(offset, 20)
             if (!response.isSuccessful)
-                withContext(Dispatchers.Main) {
-                    showSnackbar(requireView(), "Failed to Fetch Locations", Snackbar.LENGTH_SHORT)
-                }
+                showSnackbarInMain(requireView(), "Failed to Fetch Locations", Snackbar.LENGTH_SHORT)
             else {
                 val results = response.body()!!.results
                 val deferredList = ArrayList<Deferred<ItemLocation>>()
                 for (result in results)
-                    deferredList.add(async { pokemonApi!!.getLocation(result.name).body()!! })
+                    deferredList.add(async { pokemonApi.getLocation(result.name).body()!! })
                 locations.addAll(deferredList.awaitAll())
                 loading = true
                 withContext(Dispatchers.Main) {
                     binding.allLocations.setHasFixedSize(false)
-                    adapter!!.notifyItemRangeInserted(locations.size - results.size, results.size)
+                    adapter.notifyItemRangeInserted(locations.size - results.size, results.size)
                     binding.allLocations.setHasFixedSize(true)
                 }
             }
@@ -112,10 +111,10 @@ class LocationsFragment : Fragment() {
         name = name.trim().toLowerCase(Locale.ROOT)
         searchedLocations.clear()
         for (item in locations) {
-            if (item!!.name.trim().contains(name)) searchedLocations.add(item)
+            if (item.name.trim().contains(name)) searchedLocations.add(item)
         }
-        adapter!!.setItemLocations(searchedLocations)
-        adapter!!.notifyDataSetChanged()
+        adapter.setItemLocations(searchedLocations)
+        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -133,8 +132,8 @@ class LocationsFragment : Fragment() {
             override fun onQueryTextChange(newText: String): Boolean {
                 if (newText.isEmpty()) {
                     searchedLocations.clear()
-                    adapter!!.setItemLocations(locations)
-                    adapter!!.notifyDataSetChanged()
+                    adapter.setItemLocations(locations)
+                    adapter.notifyDataSetChanged()
                 } else searchLocationsByName(newText.toLowerCase(Locale.ROOT).trim())
                 return true
             }

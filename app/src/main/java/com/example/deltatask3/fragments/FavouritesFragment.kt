@@ -47,12 +47,15 @@ class FavouritesFragment : Fragment() {
     private var _binding: FragmentFavouritesBinding? = null
     private val binding get() = _binding!!
 
-    private var favouriteViewModel: FavouriteViewModel? = null
+    private lateinit var favouriteViewModel: FavouriteViewModel
+
     private val searchedFavourites = ArrayList<Favourite>()
-    private var adapter: FavouriteAdapter? = null
+    private lateinit var adapter: FavouriteAdapter
+
     private var removedPos = 0
     private var searching = false
     private var removed = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         _binding = FragmentFavouritesBinding.inflate(inflater, container, false)
@@ -67,7 +70,7 @@ class FavouritesFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        favouriteViewModel!!.allFavourites.observe(viewLifecycleOwner, { favourites: List<Favourite?> ->
+        favouriteViewModel.allFavourites.observe(viewLifecycleOwner, { favourites: List<Favourite?> ->
             if (favourites.isEmpty()) {
                 binding.tvFDescription.visibility = View.VISIBLE
                 binding.favourites.visibility = View.INVISIBLE
@@ -77,8 +80,8 @@ class FavouritesFragment : Fragment() {
                 binding.favourites.visibility = View.VISIBLE
                 setHasOptionsMenu(true)
             }
-            if (searching) adapter!!.setFavourites(searchedFavourites) else adapter!!.setFavourites(favourites)
-            if (removed) adapter!!.notifyItemRemoved(removedPos) else adapter!!.notifyDataSetChanged()
+            if (searching) adapter.setFavourites(searchedFavourites) else adapter.setFavourites(favourites)
+            if (removed) adapter.notifyItemRemoved(removedPos) else adapter.notifyDataSetChanged()
             removed = false
         })
     }
@@ -87,9 +90,9 @@ class FavouritesFragment : Fragment() {
         binding.favourites.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(requireContext())
         adapter = FavouriteAdapter()
-        adapter!!.setListener(object : FavouriteListener {
+        adapter.setListener(object : FavouriteListener {
             override fun onItemClicked(pos: Int, pokemon: ImageView, name: TextView) {
-                showDetails(adapter!!.getFavouriteAt(pos).pokemon, pokemon, name)
+                showDetails(adapter.getFavouriteAt(pos).pokemon, pokemon, name)
             }
 
             override fun onShareClicked(pos: Int, imageView: ImageView) {
@@ -102,7 +105,7 @@ class FavouritesFragment : Fragment() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val favourite = adapter!!.getFavouriteAt(viewHolder.adapterPosition)
+                val favourite = adapter.getFavouriteAt(viewHolder.adapterPosition)
                 removeFromFav(favourite, viewHolder.adapterPosition)
             }
 
@@ -121,7 +124,7 @@ class FavouritesFragment : Fragment() {
 
     private fun removeFromFav(favourite: Favourite, pos: Int) {
         Log.i(TAG, "removeFromFav: id=" + favourite.id)
-        favouriteViewModel!!.delete(favourite)
+        favouriteViewModel.delete(favourite)
         if (searching) searchedFavourites.removeAt(pos)
         StyleableToast.makeText(requireContext(), firstLetterToUppercase(favourite.pokemon.name) + " is removed from Favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
         removedPos = pos
@@ -129,7 +132,7 @@ class FavouritesFragment : Fragment() {
     }
 
     private fun sharePokemon(pos: Int, imageView: ImageView) {
-        val pokemon = adapter!!.getFavouriteAt(pos).pokemon
+        val pokemon = adapter.getFavouriteAt(pos).pokemon
         val bitmap = getBitmapFromView(imageView)
         try {
             val file = File(requireActivity().externalCacheDir, firstLetterToUppercase(pokemon.name) + ".png")
@@ -202,15 +205,15 @@ class FavouritesFragment : Fragment() {
     private fun searchFavouritesByName(name: String) {
         searchedFavourites.clear()
         var favouriteS: Favourite
-        for (favourite in favouriteViewModel!!.allFavourites.value!!) {
+        for (favourite in favouriteViewModel.allFavourites.value!!) {
             if (favourite.pokemon.name.trim().contains(name)) {
                 favouriteS = Favourite(favourite.pokemon)
                 favouriteS.id = favourite.id
                 searchedFavourites.add(favouriteS)
             }
         }
-        adapter!!.setFavourites(searchedFavourites)
-        adapter!!.notifyDataSetChanged()
+        adapter.setFavourites(searchedFavourites)
+        adapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -229,8 +232,8 @@ class FavouritesFragment : Fragment() {
                 searching = true
                 if (query.isEmpty()) {
                     searchedFavourites.clear()
-                    adapter!!.setFavourites(favouriteViewModel!!.allFavourites.value)
-                    adapter!!.notifyDataSetChanged()
+                    adapter.setFavourites(favouriteViewModel.allFavourites.value)
+                    adapter.notifyDataSetChanged()
                 } else searchFavouritesByName(query.toLowerCase().trim())
                 return false
             }
@@ -239,8 +242,8 @@ class FavouritesFragment : Fragment() {
                 searching = true
                 if (newText.isEmpty()) {
                     searchedFavourites.clear()
-                    adapter!!.setFavourites(favouriteViewModel!!.allFavourites.value)
-                    adapter!!.notifyDataSetChanged()
+                    adapter.setFavourites(favouriteViewModel.allFavourites.value)
+                    adapter.notifyDataSetChanged()
                 } else searchFavouritesByName(newText.toLowerCase().trim())
                 return true
             }
@@ -250,7 +253,7 @@ class FavouritesFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.deleteAll -> favouriteViewModel!!.deleteAllFavourites()
+            R.id.deleteAll -> favouriteViewModel.deleteAllFavourites()
         }
         return super.onOptionsItemSelected(item)
     }

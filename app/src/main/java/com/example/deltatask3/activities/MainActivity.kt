@@ -16,24 +16,28 @@ import java.util.*
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private var binding: ActivityMainBinding? = null
+
+    private lateinit var binding: ActivityMainBinding
+
     private var currentTitle = "Pokémon"
+
     private val fragments = ArrayList<Fragment>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
         val decorView = window.decorView
         decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        setSupportActionBar(binding!!.toolbar)
-        val drawerToggle = ActionBarDrawerToggle(this, binding!!.drawerLayout, binding!!.toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
-        binding!!.navView.setNavigationItemSelectedListener(this)
-        binding!!.drawerLayout.addDrawerListener(drawerToggle)
+        setSupportActionBar(binding.toolbar)
+        val drawerToggle = ActionBarDrawerToggle(this, binding.drawerLayout, binding.toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close)
+        binding.navView.setNavigationItemSelectedListener(this)
+        binding.drawerLayout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
         initFragments()
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().replace(R.id.frContainer, fragments[0]).commit()
-            binding!!.navView.setCheckedItem(R.id.po)
+            binding.navView.setCheckedItem(R.id.po)
         }
     }
 
@@ -84,8 +88,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (binding!!.drawerLayout.isDrawerOpen(GravityCompat.START)) binding!!.drawerLayout.closeDrawer(GravityCompat.START) else {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        else
             super.onBackPressed()
-        }
     }
 }

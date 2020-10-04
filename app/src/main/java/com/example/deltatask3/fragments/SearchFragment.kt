@@ -41,10 +41,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
 
-    companion object {
-        private const val TAG = "SearchFragment"
-    }
-
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
@@ -52,15 +48,16 @@ class SearchFragment : Fragment() {
 
     private var searchJob: Job? = null
 
-    @JvmField
     @Inject
-    var pokemonApi: PokemonApi? = null
-    private val pokemons = ArrayList<Pokemon?>()
-    private val locations = ArrayList<ItemLocation?>()
-    private val items = ArrayList<ItemLocation?>()
-    private var pokemonAdapter: PokemonAdapter? = null
-    private var locationAdapter: ItemLocationAdapter? = null
-    private var itemAdapter: ItemLocationAdapter? = null
+    lateinit var pokemonApi: PokemonApi
+
+    private val pokemons = ArrayList<Pokemon>()
+    private val locations = ArrayList<ItemLocation>()
+    private val items = ArrayList<ItemLocation>()
+    private lateinit var pokemonAdapter: PokemonAdapter
+    private lateinit var locationAdapter: ItemLocationAdapter
+    private lateinit var itemAdapter: ItemLocationAdapter
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
@@ -78,8 +75,8 @@ class SearchFragment : Fragment() {
         binding.pokemonCard.setHasFixedSize(true)
         val pokemonLayoutManager = LinearLayoutManager(requireContext())
         pokemonAdapter = PokemonAdapter()
-        pokemonAdapter!!.setPokemons(pokemons)
-        pokemonAdapter!!.setListener { _: Int, pokemon: ImageView, name: TextView -> showDetails(pokemon, name) }
+        pokemonAdapter.setPokemons(pokemons)
+        pokemonAdapter.setListener { _: Int, pokemon: ImageView, name: TextView -> showDetails(pokemon, name) }
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 return false
@@ -87,10 +84,10 @@ class SearchFragment : Fragment() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 if (pokemonIsInFavourites(pokemons[0])) {
-                    pokemonAdapter!!.notifyItemChanged(0)
-                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons[0]!!.name) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
+                    pokemonAdapter.notifyItemChanged(0)
+                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons[0].name) + " is already in favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
                 } else {
-                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons[0]!!.name) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
+                    StyleableToast.makeText(requireContext(), firstLetterToUppercase(pokemons[0].name) + " added to favourites", Toast.LENGTH_SHORT, R.style.ToastTheme).show()
                     favouriteViewModel!!.insert(Favourite(pokemons[0]))
                     pokemons.clear()
                     binding.pokemonCard.visibility = View.GONE
@@ -111,13 +108,13 @@ class SearchFragment : Fragment() {
         binding.itemCard.setHasFixedSize(true)
         val itemLayoutManager = LinearLayoutManager(requireContext())
         itemAdapter = ItemLocationAdapter()
-        itemAdapter!!.setItemLocations(items)
+        itemAdapter.setItemLocations(items)
         binding.itemCard.layoutManager = itemLayoutManager
         binding.itemCard.adapter = itemAdapter
         binding.locationCard.setHasFixedSize(true)
         val locationLayoutManager = LinearLayoutManager(requireContext())
         locationAdapter = ItemLocationAdapter()
-        locationAdapter!!.setItemLocations(locations)
+        locationAdapter.setItemLocations(locations)
         binding.locationCard.layoutManager = locationLayoutManager
         binding.locationCard.adapter = locationAdapter
     }
@@ -130,7 +127,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun showDetails(pokemonIv: ImageView, nameIv: TextView) {
-        if (pokemons[0]!!.id != 0 && pokemons[0]!!.sprites != null) {
+        if (pokemons[0].id != 0 && pokemons[0].sprites != null) {
             val intent = Intent(requireActivity(), PokemonDetailsActivity::class.java)
             val gson = Gson()
             val pokemonJson = gson.toJson(pokemons[0])
@@ -146,23 +143,23 @@ class SearchFragment : Fragment() {
         if (searchJob != null && searchJob!!.isActive)
             searchJob!!.cancel()
         searchJob = lifecycleScope.launch(Dispatchers.IO) {
-            val pokemonCall = async { pokemonApi!!.getPokemon(id) }
-            val itemCall = async { pokemonApi!!.getItem(id) }
-            val locationCall = async { pokemonApi!!.getLocation(id) }
+            val pokemonCall = async { pokemonApi.getPokemon(id) }
+            val itemCall = async { pokemonApi.getItem(id) }
+            val locationCall = async { pokemonApi.getLocation(id) }
             pokemons.clear()
             items.clear()
             locations.clear()
-            pokemons.add(pokemonCall.await().body())
-            items.add(itemCall.await().body())
-            locations.add(locationCall.await().body())
+            pokemons.add(pokemonCall.await().body()!!)
+            items.add(itemCall.await().body()!!)
+            locations.add(locationCall.await().body()!!)
             withContext(Dispatchers.Main) {
                 binding.searchResults.visibility = View.VISIBLE
                 binding.pokemonCard.visibility = View.VISIBLE
                 binding.itemCard.visibility = View.VISIBLE
                 binding.locationCard.visibility = View.VISIBLE
-                pokemonAdapter!!.notifyDataSetChanged()
-                itemAdapter!!.notifyDataSetChanged()
-                locationAdapter!!.notifyDataSetChanged()
+                pokemonAdapter.notifyDataSetChanged()
+                itemAdapter.notifyDataSetChanged()
+                locationAdapter.notifyDataSetChanged()
                 searchJob = null
             }
         }

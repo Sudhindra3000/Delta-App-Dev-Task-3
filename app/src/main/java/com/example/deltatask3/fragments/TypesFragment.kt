@@ -9,15 +9,35 @@ import androidx.fragment.app.Fragment
 import com.example.deltatask3.activities.PokemonsActivity
 import com.example.deltatask3.databinding.FragmentTypesBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 
 @AndroidEntryPoint
 class TypesFragment : Fragment(), View.OnClickListener {
 
+    companion object {
+        private val types = arrayListOf(
+                "Normal",
+                "Fighting",
+                "Flying",
+                "Poison",
+                "Ground",
+                "Rock",
+                "Bug",
+                "Ghost",
+                "Steel",
+                "Fire",
+                "Water",
+                "Grass",
+                "Electric",
+                "Psychic",
+                "Ice",
+                "Dragon",
+                "Dark",
+                "Fairy"
+        )
+    }
+
     private var _binding: FragmentTypesBinding? = null
     private val binding get() = _binding!!
-
-    private var types: ArrayList<String>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -28,7 +48,6 @@ class TypesFragment : Fragment(), View.OnClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initButtons()
-        initTypes()
     }
 
     private fun initButtons() {
@@ -52,34 +71,12 @@ class TypesFragment : Fragment(), View.OnClickListener {
         binding.button18.setOnClickListener { v: View -> onClick(v) }
     }
 
-    private fun initTypes() {
-        types = ArrayList()
-        types!!.add("Normal")
-        types!!.add("Fighting")
-        types!!.add("Flying")
-        types!!.add("Poison")
-        types!!.add("Ground")
-        types!!.add("Rock")
-        types!!.add("Bug")
-        types!!.add("Ghost")
-        types!!.add("Steel")
-        types!!.add("Fire")
-        types!!.add("Water")
-        types!!.add("Grass")
-        types!!.add("Electric")
-        types!!.add("Psychic")
-        types!!.add("Ice")
-        types!!.add("Dragon")
-        types!!.add("Dark")
-        types!!.add("Fairy")
-    }
-
     override fun onClick(v: View) {
         val intent = Intent(activity, PokemonsActivity::class.java)
         val TYPES = 23
         intent.putExtra("mode", TYPES)
         intent.putExtra("typeID", v.tag.toString().toInt())
-        intent.putExtra("typeName", types!![v.tag.toString().toInt() - 1])
+        intent.putExtra("typeName", types[v.tag.toString().toInt() - 1])
         startActivity(intent)
     }
 

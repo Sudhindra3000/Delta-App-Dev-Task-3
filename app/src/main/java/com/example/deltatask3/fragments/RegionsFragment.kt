@@ -14,10 +14,21 @@ import java.util.*
 @AndroidEntryPoint
 class RegionsFragment : Fragment(), View.OnClickListener {
 
+    companion object {
+        private val regions: ArrayList<String> = arrayListOf(
+                "Kanto",
+                "Johto",
+                "Hoenn",
+                "Sinnoh",
+                "Unova",
+                "Kalos",
+                "Alola",
+        )
+    }
+
     private var _binding: FragmentRegionsBinding? = null
     private val binding get() = _binding!!
 
-    private var regions: ArrayList<String>? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         _binding = FragmentRegionsBinding.inflate(inflater, container, false)
@@ -27,7 +38,6 @@ class RegionsFragment : Fragment(), View.OnClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initButtons()
-        initRegions()
     }
 
     private fun initButtons() {
@@ -40,23 +50,12 @@ class RegionsFragment : Fragment(), View.OnClickListener {
         binding.btU.setOnClickListener { v: View -> onClick(v) }
     }
 
-    private fun initRegions() {
-        regions = ArrayList()
-        regions!!.add("Kanto")
-        regions!!.add("Johto")
-        regions!!.add("Hoenn")
-        regions!!.add("Sinnoh")
-        regions!!.add("Unova")
-        regions!!.add("Kalos")
-        regions!!.add("Alola")
-    }
-
     override fun onClick(v: View) {
         val intent = Intent(activity, PokemonsActivity::class.java)
         val REGIONS = 45
         intent.putExtra("mode", REGIONS)
         intent.putExtra("regionID", v.tag.toString().toInt())
-        intent.putExtra("regionName", regions!![v.tag.toString().toInt()])
+        intent.putExtra("regionName", regions[v.tag.toString().toInt()])
         startActivity(intent)
     }
 

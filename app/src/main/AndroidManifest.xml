@@ -28,7 +28,7 @@
             android:resource="@array/preloaded_fonts" />
 
         <provider
-            android:name=".utils.GenericFileProvider"
+            android:name=".models.GenericFileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
