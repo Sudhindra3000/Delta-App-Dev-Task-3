@@ -12,4 +12,5 @@ suspend fun showSnackbarInMain(view: View, string: String, duration: Int) {
     }
 }
 
-fun firstLetterToUppercase(string: String) = string.substring(0, 1).toUpperCase(Locale.ROOT) + string.substring(1)
+fun firstLetterToUppercase(string: String) =
+    string.substring(0, 1).uppercase(Locale.ROOT) + string.substring(1)
