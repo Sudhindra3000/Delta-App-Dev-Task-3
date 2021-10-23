@@ -1,25 +1,22 @@
-package com.example.deltatask3.database;
+package com.example.deltatask3.database
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.Query;
-
-import java.util.List;
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
 
 @Dao
-public interface FavouriteDao {
-
+interface FavouriteDao {
     @Insert
-    void insertFavourite(Favourite favourite);
+    fun insertFavourite(favourite: Favourite)
 
     @Delete
-    void deleteFavourite(Favourite favourite);
+    fun deleteFavourite(favourite: Favourite)
 
     @Query("DELETE FROM favourites_table")
-    void deleteAllFavourites();
+    fun deleteAllFavourites()
 
     @Query("SELECT * FROM favourites_table")
-    LiveData<List<Favourite>> getAllFavourites();
+    fun getAllFavourites(): LiveData<List<Favourite>>
 }
