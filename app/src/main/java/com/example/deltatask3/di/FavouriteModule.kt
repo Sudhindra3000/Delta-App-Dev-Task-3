@@ -2,11 +2,8 @@ package com.example.deltatask3.di
 
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.components.SingletonComponent
 
 @Module
-@InstallIn(ApplicationComponent::class)
-object FavouriteModule {
-
-
-}
+@InstallIn(SingletonComponent::class)
+object FavouriteModule {}

@@ -15,7 +15,9 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activities.PokemonsActivity" />
         <activity android:name=".activities.PokemonDetailsActivity" />
-        <activity android:name=".activities.MainActivity">
+        <activity
+            android:name=".activities.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
