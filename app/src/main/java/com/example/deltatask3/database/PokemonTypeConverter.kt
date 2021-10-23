@@ -1,20 +1,16 @@
-package com.example.deltatask3.database;
+package com.example.deltatask3.database
 
-import androidx.room.TypeConverter;
+import androidx.room.TypeConverter
+import com.example.deltatask3.models.Pokemon
+import com.google.gson.Gson
 
-import com.example.deltatask3.models.Pokemon;
-import com.google.gson.Gson;
-
-public class PokemonTypeConverter {
-
+object PokemonTypeConverter {
+    @JvmStatic
     @TypeConverter
-    public static Pokemon stringToPokemon(String value) {
-        if (value == null) return new Pokemon("Name");
-        return new Gson().fromJson(value, Pokemon.class);
-    }
+    fun stringToPokemon(value: String?): Pokemon =
+        if (value == null) Pokemon("Name") else Gson().fromJson(value, Pokemon::class.java)
 
+    @JvmStatic
     @TypeConverter
-    public static String pokemonToString(Pokemon pokemon) {
-        return new Gson().toJson(pokemon);
-    }
+    fun pokemonToString(pokemon: Pokemon?): String = Gson().toJson(pokemon)
 }
